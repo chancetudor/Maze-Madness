@@ -14,9 +14,34 @@
 #include "maze.h"
 #include "cell.h"
 #include "stack.h"
+#include "queue.h"
 
 extern void srandom(unsigned int);
 extern long int random(void);
+static void printName(void);
+
+struct cell {
+  int row;
+  int column;
+  bool rightWall;
+  bool bottomWall;
+  int value;
+};
+
+struct maze {
+  CELL * (**array);
+  int rows;
+  int columns;
+  unsigned int seed;
+};
+
+extern MAZE * newMaze(void) {
+  MAZE * maze = malloc(sizeof(MAZE));
+  assert(maze != 0);
+  maze->rows = 0;
+  maze->columns = 0;
+  maze->seed = 1;
+}
 
 static void Fatal(char *fmt, ...) {
   va_list ap;
@@ -36,6 +61,11 @@ static int ProcessOptions(int argc, char **argv) {
   char *arg = 0;
   FILE *inFile = 0;
   FILE *outFile = 0;
+  int rows = 0;
+  int columns = 0;
+  unsigned int seed = 0;
+
+  MAZE * m = newMAZE();
 
   while (argIndex < argc && *argv[argIndex] == '-') {
   /* check if stdin, represented by "-" is an argument */
@@ -65,7 +95,7 @@ static int ProcessOptions(int argc, char **argv) {
       *         MemorySize = atol(arg);
       *         argsUsed = 1;
       *         break;
-      *
+      * ///////////////////////////////////////////////
       * when option has multiple arguments, do this
       *
       *     examples are -r4096 1280 or -r 4096 1280
@@ -75,8 +105,7 @@ static int ProcessOptions(int argc, char **argv) {
       *         Cols = atoi(argv[argIndex+1]);
       *         argsUsed = 2;
       *         break;
-      *
-      *
+      * ///////////////////////////////////////////////
       * when option does not have an argument, do this
       *
       *     example is -a
@@ -85,27 +114,24 @@ static int ProcessOptions(int argc, char **argv) {
       *         PrintActions = 1;
       *         break;
       */
-
-
       case 'v': // prints name, then exits
         printName();
         break;
       case 'c': // creates new maze
-        MAZE * m = newMAZE();
-        int rows = atoi(arg);
-        int columns = atoi(argv[argIndex + 1]);
+        rows = atoi(arg);
+        columns = atoi(argv[argIndex + 1]);
         outFile = argv[argIndex + 2];
-        setMazeSize(m, r, c);
+        setMazeSize(m, rows, columns);
         argsUsed = 2;
         break;
       case 'r': // seeds a pseudo-random number generator
-        unsigned int seed = atoi(arg);
-        
+        seed = atoi(arg);
+        setMazeSeed(m, seed);
         argsUsed = 1;
         break;
-      case 's': // solve the maze in file III placing solution in file OOO
+      //case 's': // solve the maze in file III placing solution in file OOO
 
-      case 'd':
+      //case 'd': // draw the created/solved maze in file III
 
       default:
         fprintf(stderr, "option %s not understood\n", argv[start]);
@@ -128,33 +154,18 @@ extern void setMazeSize(MAZE * array, int r, int c) {
   array->columns = c;
 }
 
+extern void setMazeSeed(MAZE * array, int s) { array->seed = s; }
+
+extern int getMazeRows(MAZE * array) { return array->rows; }
+
+extern int getMazeColumns(MAZE * array) { return array->columns; }
+
 int main(int argc, char const *argv[]) {
   int argIndex = 0;
   if (argc == 1) { Fatal("%d arguments!\n", argc - 1); } // not enough arguments
   argIndex = ProcessOptions(argc, argv);
   if (argIndex == argc) { printf("No arguments\n"); }
 
-  struct cell {
-    int row;
-    int column;
-    bool rightWall;
-    bool bottomWall;
-    int value;
-  };
-
-  struct maze {
-    int rows;
-    int columns;
-    CELL * (**array);
-  };
-
-  extern MAZE * newMaze(void) {
-    MAZE * maze = malloc(sizeof(MAZE));
-    assert(maze != 0);
-    maze->rows = 0;
-    maze->columns = 0;
-
-  }
 
 
 

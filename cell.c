@@ -8,6 +8,7 @@
 //
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
 #include "cell.h"
@@ -28,6 +29,7 @@ extern CELL * newCELL(void) {
   cell->rightWall = true;
   cell->bottomWall = true;
   cell->value = 0;
+  return cell;
 }
 
 extern int getValue(CELL * elem) {
