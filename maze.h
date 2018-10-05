@@ -19,6 +19,7 @@ extern void setMazeSize(MAZE * array, int r, int c);
 extern void setMazeSeed(MAZE * array, int s);
 extern int getMazeRows(MAZE * array);
 extern int getMazeColumns(MAZE * array);
+extern CELL *** initializeMaze(MAZE * array);
 // solve maze function
 // build maze function
 // draw maze function

@@ -160,7 +160,7 @@ extern int getMazeRows(MAZE * array) { return array->rows; }
 
 extern int getMazeColumns(MAZE * array) { return array->columns; }
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char **argv) {
   int argIndex = 0;
   if (argc == 1) { Fatal("%d arguments!\n", argc - 1); } // not enough arguments
   argIndex = ProcessOptions(argc, argv);
