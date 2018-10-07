@@ -19,6 +19,8 @@
 extern void srandom(unsigned int);
 extern long int random(void);
 static void printName(void);
+static void setInFile(MAZE * m, char * iFile);
+static void setOutFile(MAZE * m, char * oFile);
 
 struct cell {
   int row;
@@ -29,18 +31,29 @@ struct cell {
 };
 
 struct maze {
-  CELL * (**array);
+  CELL * (**matrix);
   int rows;
   int columns;
   unsigned int seed;
+  char * inFile;
+  char * outFile;
+  int numDashes;
+  int numVertBars;
 };
 
-extern MAZE * newMaze(void) {
-  MAZE * maze = malloc(sizeof(MAZE));
-  assert(maze != 0);
-  maze->rows = 0;
-  maze->columns = 0;
-  maze->seed = 1;
+extern MAZE * newMAZE(void) {
+  MAZE * m = malloc(sizeof(MAZE));
+  assert(m != 0);
+  m->rows = 0;
+  m->columns = 0;
+  m->seed = 1;
+  m->inFile = 0;
+  m->outFile = 0;
+  m->matrix = 0;
+  m->numDashes = 0;
+  m->numVertBars = 0;
+
+  return m;
 }
 
 static void Fatal(char *fmt, ...) {
@@ -59,13 +72,13 @@ static int ProcessOptions(int argc, char **argv) {
   int argIndex = 1;
   int argsUsed = 0;
   char *arg = 0;
-  FILE *inFile = 0;
-  FILE *outFile = 0;
+  char *iFile = 0; // create char m to hold name of input file
+  char *oFile = 0; // create char m to hold name of output file
   int rows = 0;
   int columns = 0;
   unsigned int seed = 0;
 
-  MAZE * m = newMAZE();
+  MAZE * m = newMAZE(); // creates new MAZE object
 
   while (argIndex < argc && *argv[argIndex] == '-') {
   /* check if stdin, represented by "-" is an argument */
@@ -116,23 +129,29 @@ static int ProcessOptions(int argc, char **argv) {
       */
       case 'v': // prints name, then exits
         printName();
-        break;
-      case 'c': // creates new maze
-        rows = atoi(arg);
-        columns = atoi(argv[argIndex + 1]);
-        outFile = argv[argIndex + 2];
-        setMazeSize(m, rows, columns);
-        argsUsed = 2;
-        break;
+        exit(0);
       case 'r': // seeds a pseudo-random number generator
         seed = atoi(arg);
         setMazeSeed(m, seed);
         argsUsed = 1;
         break;
+      case 'c': // creates new maze
+        rows = atoi(arg);
+        columns = atoi(argv[argIndex + 1]);
+        oFile = argv[argIndex + 2];
+        setMazeSize(m, rows, columns);
+        setOutFile(m, oFile);
+        createMatrix(m);
+        argsUsed = 3;
+        break;
       //case 's': // solve the maze in file III placing solution in file OOO
 
-      //case 'd': // draw the created/solved maze in file III
-
+      /*case 'd': // draw the created/solved maze in file III
+        // number of '----' = (columns * 4) + 1
+        setMazeDashes(m, (getMazeColumns(m) * 4) + 1);
+        // number of '|' = # of columns given
+        setMazeBars(m, getMazeRows(m));
+      */
       default:
         fprintf(stderr, "option %s not understood\n", argv[start]);
         exit(-1);
@@ -144,21 +163,38 @@ static int ProcessOptions(int argc, char **argv) {
   return argIndex;
 }
 
-static void printName(void) {
-  printf("Written by Chance Tudor");
-  exit(0);
+static void printName(void) { printf("Written by Chance Tudor\n"); }
+
+extern void setMazeSize(MAZE * m, int r, int c) {
+  m->rows = r;
+  m->columns = c;
 }
 
-extern void setMazeSize(MAZE * array, int r, int c) {
-  array->rows = r;
-  array->columns = c;
+extern void setMazeSeed(MAZE * m, int s) { m->seed = s; }
+
+static void setOutFile(MAZE * m, char * file) { m->outFile = file; }
+
+static void setInFile(MAZE * m, char * file) { m->inFile = file; }
+
+extern int getMazeRows(MAZE * m) { return m->rows; }
+
+extern int getMazeColumns(MAZE * m) { return m->columns; }
+
+extern void createMatrix(MAZE * m) {
+  // create a one-dimensional array of row pointers
+  m->matrix = malloc(sizeof(CELL **) * getMazeRows(m));
+  // make all the rows
+  for (int i = 0; i < getMazeRows(m); ++i) {
+   // create a single row
+   m->matrix[i] = malloc(sizeof(CELL *) * getMazeColumns(m));
+   // initialize the slots in the row
+   for (int j = 0; j < getMazeColumns(m); ++j) {
+     m->matrix[i][j] = newCELL();
+     // set row and column vals for each new cell
+     setLocation(m->matrix[i][j], i, j);
+   }
+ }
 }
-
-extern void setMazeSeed(MAZE * array, int s) { array->seed = s; }
-
-extern int getMazeRows(MAZE * array) { return array->rows; }
-
-extern int getMazeColumns(MAZE * array) { return array->columns; }
 
 int main(int argc, char **argv) {
   int argIndex = 0;

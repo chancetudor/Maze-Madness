@@ -1,10 +1,11 @@
 OOPTS = -g -std=c99 -Wall -Wextra -c
 LOPTS = -g -std=c99 -Wall -Wextra
-DAOBJS = da.o #da-test2.o integer.o
-CDAOBJS = cda.o #test-cda3.o integer.o
-SOBJS = stack.o da.o #stack-test.o integer.o
-QOBJS = queue.o cda.o #test-queue.o integer.o
-MOBJS = stack.o queue.o da.o cda.o
+DAOBJS = da.o da-test2.o integer.o
+CDAOBJS = cda.o test-cda3.o integer.o
+SOBJS = stack.o da.o stack-test.o integer.o
+QOBJS = queue.o cda.o test-queue.o integer.o
+MOBJS = maze.o cell.o stack.o queue.o da.o cda.o
+COBJS = cell.o
 
 all : da stack cda queue maze
 
@@ -17,9 +18,9 @@ stack : $(SOBJS)
 queue : $(QOBJS)
 	gcc $(LOPTS) $(QOBJS) -o queue
 maze : $(MOBJS)
-	gcc $(LOPTS) $(MOBJS) -o maze
-#integer.o : integer.c integer.h
-	#gcc $(OOPTS) integer.c
+	gcc $(LOPTS) $(MOBJS) -o amaze
+integer.o : integer.c integer.h
+	gcc $(OOPTS) integer.c
 da.o : da.c da.h
 	gcc $(OOPTS) da.c
 stack.o : stack.c stack.h da.h
@@ -28,8 +29,10 @@ cda.o : cda.c cda.h
 	gcc $(OOPTS) cda.c
 queue.o : queue.c queue.h cda.h
 	gcc $(OOPTS) queue.c
+cell.o : cell.c cell.h
+	gcc $(OOPTS) cell.c
 maze.o : maze.c maze.h cell.c cell.h stack.h
-	 gcc $(OOPTS) maze.c
+	gcc $(OOPTS) maze.c
 #da-test2.o : da-test2.c da.h
 	#gcc $(OOPTS) da-test2.c
 #test-cda3.o : test-cda3.c cda.h
@@ -38,15 +41,17 @@ maze.o : maze.c maze.h cell.c cell.h stack.h
 	#gcc $(OOPTS) stack-test.c
 #test-queue.o : test-queue.c queue.h cda.h
 	#gcc $(OOPTS) test-queue.c
-test : #da stack cda queue
+#test : #da stack cda queue
 	#./da
 	#./cda
 	#./stack
 	#./queue
-valgrind : #da stack cda queue
+valgrind : maze #da stack cda queue
 	#valgrind --leak-check=full ./da
 	#valgrind --leak-check=full ./cda
 	#valgrind --leak-check=full ./stack
 	#valgrind --leak-check=full ./queue
+	valgrind --leak-check=full ./maze
 clean :
-	rm -f $(DAOBJS) $(SOBJS) $(CDAOBJS) $(QOBJS) da stack cda queue
+	rm -f $(DAOBJS) $(SOBJS) $(CDAOBJS) $(QOBJS) $(COBJS) $(MOBJS) \
+	da stack cda queue maze
