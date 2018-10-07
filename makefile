@@ -5,7 +5,7 @@ CDAOBJS = cda.o test-cda3.o integer.o
 SOBJS = stack.o da.o stack-test.o integer.o
 QOBJS = queue.o cda.o test-queue.o integer.o
 MOBJS = maze.o cell.o stack.o queue.o da.o cda.o
-COBJS = cell.o
+COBJS = cell.o da.o
 
 all : da stack cda queue maze
 
@@ -29,7 +29,7 @@ cda.o : cda.c cda.h
 	gcc $(OOPTS) cda.c
 queue.o : queue.c queue.h cda.h
 	gcc $(OOPTS) queue.c
-cell.o : cell.c cell.h
+cell.o : cell.c cell.h da.h
 	gcc $(OOPTS) cell.c
 maze.o : maze.c maze.h cell.c cell.h stack.h
 	gcc $(OOPTS) maze.c
@@ -41,11 +41,12 @@ maze.o : maze.c maze.h cell.c cell.h stack.h
 	#gcc $(OOPTS) stack-test.c
 #test-queue.o : test-queue.c queue.h cda.h
 	#gcc $(OOPTS) test-queue.c
-#test : #da stack cda queue
+test : maze #da stack cda queue
 	#./da
 	#./cda
 	#./stack
 	#./queue
+	./amaze -r 2777 -c 83 16 ready.maze
 valgrind : maze #da stack cda queue
 	#valgrind --leak-check=full ./da
 	#valgrind --leak-check=full ./cda

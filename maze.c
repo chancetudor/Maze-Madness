@@ -16,6 +16,7 @@
 #include "cell.h"
 #include "stack.h"
 #include "queue.h"
+#include "da.h"
 
 extern void srandom(unsigned int);
 extern long int random(void);
@@ -32,6 +33,8 @@ struct cell {
   bool rightWall;
   bool bottomWall;
   int value;
+  int nCount;
+  DA * neighbors;
 };
 
 struct maze {
@@ -64,6 +67,16 @@ extern MAZE * newMAZE(void) {
   m->draw = false;
 
   return m;
+}
+
+extern void freeMAZE(MAZE * m) {
+  for (int i = 0; i < getMAZERows(m); ++i) {
+   for (int j = 0; j < getMAZEColumns(m); ++j) {
+     freeCELL(m->matrix[i][j]);
+   }
+ }
+
+ free(m);
 }
 
 static void Fatal(char *fmt, ...) {
@@ -142,14 +155,14 @@ static int ProcessOptions(MAZE * maze, int argc, char **argv) {
         exit(0);
       case 'r': // seeds a pseudo-random number generator
         seed = atoi(arg);
-        setMazeSeed(m, seed);
+        setMAZESeed(m, seed);
         argsUsed = 1;
         break;
       case 'c': // creates new maze
         rows = atoi(arg);
         columns = atoi(argv[argIndex + 1]);
         oFile = argv[argIndex + 2];
-        setMazeSize(m, rows, columns);
+        setMAZESize(m, rows, columns);
         setOutFile(m, oFile);
         createMatrix(m);
         setBuild(m);
@@ -159,9 +172,9 @@ static int ProcessOptions(MAZE * maze, int argc, char **argv) {
         // setSolve(m);
       /*case 'd': // draw the created/solved maze in file III
         // number of '----' = (columns * 4) + 1
-        setMazeDashes(m, (getMazeColumns(m) * 4) + 1);
+        setMAZEDashes(m, (getMAZEColumns(m) * 4) + 1);
         // number of '|' = # of columns given
-        setMazeBars(m, getMazeRows(m));
+        setMAZEBars(m, getMAZERows(m));
         setDraw(m);
       */
       default:
@@ -177,12 +190,12 @@ static int ProcessOptions(MAZE * maze, int argc, char **argv) {
 
 static void printName(void) { printf("Written by Chance Tudor\n"); }
 
-extern void setMazeSize(MAZE * m, int r, int c) {
+extern void setMAZESize(MAZE * m, int r, int c) {
   m->rows = r;
   m->columns = c;
 }
 
-extern void setMazeSeed(MAZE * m, int s) { m->seed = s; }
+extern void setMAZESeed(MAZE * m, int s) { m->seed = s; }
 
 static void setOutFile(MAZE * m, char * file) { m->outFile = file; }
 
@@ -194,54 +207,91 @@ static void setSolve(MAZE * m) { m->solve = true; }
 
 static void setDraw(MAZE * m) { m->draw = true; }
 
-extern int getMazeRows(MAZE * m) { return m->rows; }
+extern int getMAZERows(MAZE * m) { return m->rows; }
 
-extern int getMazeColumns(MAZE * m) { return m->columns; }
+extern int getMAZEColumns(MAZE * m) { return m->columns; }
 
 extern void createMatrix(MAZE * m) {
   // create a one-dimensional array of row pointers
-  m->matrix = malloc(sizeof(CELL **) * getMazeRows(m)); // FIXME: free!
+  m->matrix = malloc(sizeof(CELL **) * getMAZERows(m)); // FIXME: free!
   // make all the rows
-  for (int i = 0; i < getMazeRows(m); ++i) {
+  for (int i = 0; i < getMAZERows(m); ++i) {
    // create a single row
-   m->matrix[i] = malloc(sizeof(CELL *) * getMazeColumns(m)); // FIXME: free!
+   m->matrix[i] = malloc(sizeof(CELL *) * getMAZEColumns(m)); // FIXME: free!
    // initialize the slots in the row
-   for (int j = 0; j < getMazeColumns(m); ++j) {
+   for (int j = 0; j < getMAZEColumns(m); ++j) {
      m->matrix[i][j] = newCELL(); // FIXME: free!
      // set row and column vals for each new cell
-     setLocation(m->matrix[i][j], i, j);
+     CELL * ptr = m->matrix[i][j];
+     setCELLLocation(ptr, i, j);
+                    // ptr, top, left, right, bottom
+     if (i == 0 && j == 0) { // start of maze
+       setCELLNeighbors(ptr, 0, 0, m->matrix[i+1][j], m->matrix[i][j+1]);
+     }
+     else if ((i == getMAZERows(m) - 1) && j == 0) { // far right of first row
+       setCELLNeighbors(ptr, 0, m->matrix[i-1][j], 0, m->matrix[i][j+1]);
+     }
+     else if (i == getMAZERows(m) - 1) { // far right of any row
+       setCELLNeighbors(ptr, m->matrix[i][j-1], m->matrix[i-1][j], 0, m->matrix[i][j+1]);
+     }
+     else if (i == 0 && (j == getMAZEColumns(m) - 1)) { // bottom of first col.
+       setCELLNeighbors(ptr, m->matrix[i][j-1], 0, m->matrix[i+1][j], 0);
+     }
+     else if (j == getMAZEColumns(m) - 1) { // bottom of any col.
+       setCELLNeighbors(ptr, m->matrix[i][j-1], m->matrix[i-1][j], m->matrix[i+1][j], 0);
+     }
+     else if ((i == getMAZERows(m) - 1) && (j == getMAZEColumns(m) - 1)) { // end of maze
+       setCELLNeighbors(ptr, m->matrix[i][j-1], m->matrix[i-1][j], 0, 0);
+     }
+     else { // middle of array
+       setCELLNeighbors(ptr, m->matrix[i][j-1], m->matrix[i-1][j], m->matrix[i+1][j], m->matrix[i][j+1]);
+     }
    }
  }
 }
 
-extern 
+extern CELL * findNeighbor(CELL * input) {
+  unsigned int index = random() % input->nCount;
+  CELL * val = getCELLNeighbors(input, index);
+  return val;
+}
 
 extern void buildMAZE(MAZE * m) {
   STACK * s = newSTACK(); // FIXME: free!
   srand(m->seed);
-  CELL * c = m->matrix[0][0];
-  push(s, c);
+  CELL * old = m->matrix[0][0];
+  push(s, old);
 
   while (sizeSTACK(s) != 0) {
-    c = peekSTACK(s);
-    CELL * ptr = findNeighbor(c); // FIXME: build function
-    if (ptr == 0) {
+    old = peekSTACK(s);
+    CELL * neighbor = findNeighbor(old);
+    if (neighbor == 0) {
       pop(s);
     }
     else {
       // if path went up
-        // remove bottom(ptr)
+      if (getColumn(neighbor) < getColumn(old)) {
+        setBottom(neighbor, false);
+      }
       // if path went down
-        // remove bottom(c)
+      if (getColumn(neighbor) > getColumn(old)) {
+        setBottom(old, false);
+      }
       // if path went left
-        // remove right(ptr)
+      if (getRow(neighbor) < getRow(old)) {
+        setRight(neighbor, false);
+      }
       // if path went right
-        // remove right(c)
+      if (getRow(neighbor) > getRow(old)) {
+        setRight(old, false);
+      }
     }
+    push(s, neighbor);
   }
 
   freeSTACK(s);
 }
+
 
 int main(int argc, char **argv) {
   MAZE * m = newMAZE();
