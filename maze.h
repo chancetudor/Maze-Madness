@@ -24,6 +24,8 @@ extern int getMazeRows(MAZE * m);
 extern int getMazeColumns(MAZE * m);
 extern void createMatrix(MAZE * m);
 extern void buildMAZE(MAZE * m);
+extern CELL * findNeighbor(CELL * c);
+extern void freeMAZE(MAZE * m);
 // solve maze function
 // build maze function
 // draw maze function

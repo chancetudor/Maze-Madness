@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stdbool.h>
 #include "maze.h"
 #include "cell.h"
 #include "stack.h"
@@ -21,6 +22,9 @@ extern long int random(void);
 static void printName(void);
 static void setInFile(MAZE * m, char * iFile);
 static void setOutFile(MAZE * m, char * oFile);
+static void setBuild(MAZE * m);
+static void setSolve(MAZE * m);
+static void setDraw(MAZE * m);
 
 struct cell {
   int row;
@@ -39,10 +43,13 @@ struct maze {
   char * outFile;
   int numDashes;
   int numVertBars;
+  bool build;
+  bool solve;
+  bool draw;
 };
 
 extern MAZE * newMAZE(void) {
-  MAZE * m = malloc(sizeof(MAZE));
+  MAZE * m = malloc(sizeof(MAZE)); // FIXME: free!
   assert(m != 0);
   m->rows = 0;
   m->columns = 0;
@@ -52,6 +59,9 @@ extern MAZE * newMAZE(void) {
   m->matrix = 0;
   m->numDashes = 0;
   m->numVertBars = 0;
+  m->build = false;
+  m->solve = false;
+  m->draw = false;
 
   return m;
 }
@@ -67,18 +77,18 @@ static void Fatal(char *fmt, ...) {
   exit(-1);
 }
 
-static int ProcessOptions(int argc, char **argv) {
+static int ProcessOptions(MAZE * maze, int argc, char **argv) {
   int start = 0;
   int argIndex = 1;
   int argsUsed = 0;
   char *arg = 0;
-  char *iFile = 0; // create char m to hold name of input file
-  char *oFile = 0; // create char m to hold name of output file
+  char *iFile = 0; // create char array to hold name of input file
+  char *oFile = 0; // create char array to hold name of output file
   int rows = 0;
   int columns = 0;
   unsigned int seed = 0;
 
-  MAZE * m = newMAZE(); // creates new MAZE object
+  MAZE * m = maze; // creates new MAZE object
 
   while (argIndex < argc && *argv[argIndex] == '-') {
   /* check if stdin, represented by "-" is an argument */
@@ -142,15 +152,17 @@ static int ProcessOptions(int argc, char **argv) {
         setMazeSize(m, rows, columns);
         setOutFile(m, oFile);
         createMatrix(m);
+        setBuild(m);
         argsUsed = 3;
         break;
       //case 's': // solve the maze in file III placing solution in file OOO
-
+        // setSolve(m);
       /*case 'd': // draw the created/solved maze in file III
         // number of '----' = (columns * 4) + 1
         setMazeDashes(m, (getMazeColumns(m) * 4) + 1);
         // number of '|' = # of columns given
         setMazeBars(m, getMazeRows(m));
+        setDraw(m);
       */
       default:
         fprintf(stderr, "option %s not understood\n", argv[start]);
@@ -176,35 +188,81 @@ static void setOutFile(MAZE * m, char * file) { m->outFile = file; }
 
 static void setInFile(MAZE * m, char * file) { m->inFile = file; }
 
+static void setBuild(MAZE * m) { m->build = true; }
+
+static void setSolve(MAZE * m) { m->solve = true; }
+
+static void setDraw(MAZE * m) { m->draw = true; }
+
 extern int getMazeRows(MAZE * m) { return m->rows; }
 
 extern int getMazeColumns(MAZE * m) { return m->columns; }
 
 extern void createMatrix(MAZE * m) {
   // create a one-dimensional array of row pointers
-  m->matrix = malloc(sizeof(CELL **) * getMazeRows(m));
+  m->matrix = malloc(sizeof(CELL **) * getMazeRows(m)); // FIXME: free!
   // make all the rows
   for (int i = 0; i < getMazeRows(m); ++i) {
    // create a single row
-   m->matrix[i] = malloc(sizeof(CELL *) * getMazeColumns(m));
+   m->matrix[i] = malloc(sizeof(CELL *) * getMazeColumns(m)); // FIXME: free!
    // initialize the slots in the row
    for (int j = 0; j < getMazeColumns(m); ++j) {
-     m->matrix[i][j] = newCELL();
+     m->matrix[i][j] = newCELL(); // FIXME: free!
      // set row and column vals for each new cell
      setLocation(m->matrix[i][j], i, j);
    }
  }
 }
 
+extern 
+
+extern void buildMAZE(MAZE * m) {
+  STACK * s = newSTACK(); // FIXME: free!
+  srand(m->seed);
+  CELL * c = m->matrix[0][0];
+  push(s, c);
+
+  while (sizeSTACK(s) != 0) {
+    c = peekSTACK(s);
+    CELL * ptr = findNeighbor(c); // FIXME: build function
+    if (ptr == 0) {
+      pop(s);
+    }
+    else {
+      // if path went up
+        // remove bottom(ptr)
+      // if path went down
+        // remove bottom(c)
+      // if path went left
+        // remove right(ptr)
+      // if path went right
+        // remove right(c)
+    }
+  }
+
+  freeSTACK(s);
+}
+
 int main(int argc, char **argv) {
+  MAZE * m = newMAZE();
+  // process command line arguments
   int argIndex = 0;
   if (argc == 1) { Fatal("%d arguments!\n", argc - 1); } // not enough arguments
-  argIndex = ProcessOptions(argc, argv);
   if (argIndex == argc) { printf("No arguments\n"); }
+  argIndex = ProcessOptions(m, argc, argv);
+  // build maze
+  if (m->build == true) {
+    buildMAZE(m);
+  }
+  /*if (m->solve == true) {
+    solveMAZE(m);
+  }
+  if (m->draw == true) {
+    drawMAZE(m);
+  }*/
 
 
 
-
-
+  freeMAZE(m);
   return 0;
 }

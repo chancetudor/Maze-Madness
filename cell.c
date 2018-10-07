@@ -50,6 +50,6 @@ extern void setValue(CELL * elem, int val) {
   elem->value = val;
 }
 
-extern void freeCELL(CELL * elem) {
-  free(elem);
+extern void freeCELL(CELL * c) {
+  free(c);
 }
