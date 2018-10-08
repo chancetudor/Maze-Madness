@@ -45,7 +45,7 @@ struct maze {
   char * inFile;
   char * outFile;
   int numDashes;
-  int numVertBars;
+  int numBars;
   bool build;
   bool solve;
   bool draw;
@@ -61,7 +61,7 @@ extern MAZE * newMAZE(void) {
   m->outFile = 0;
   m->matrix = 0;
   m->numDashes = 0;
-  m->numVertBars = 0;
+  m->numBars = 0;
   m->build = false;
   m->solve = false;
   m->draw = false;
@@ -90,7 +90,7 @@ static void Fatal(char *fmt, ...) {
   exit(-1);
 }
 
-static int ProcessOptions(MAZE * maze, int argc, char **argv) {
+static int ProcessOptions(MAZE * m, int argc, char **argv) {
   int start = 0;
   int argIndex = 1;
   int argsUsed = 0;
@@ -100,8 +100,6 @@ static int ProcessOptions(MAZE * maze, int argc, char **argv) {
   int rows = 0;
   int columns = 0;
   unsigned int seed = 0;
-
-  MAZE * m = maze; // creates new MAZE object
 
   while (argIndex < argc && *argv[argIndex] == '-') {
   /* check if stdin, represented by "-" is an argument */
@@ -168,15 +166,19 @@ static int ProcessOptions(MAZE * maze, int argc, char **argv) {
         setBuild(m);
         argsUsed = 3;
         break;
-      //case 's': // solve the maze in file III placing solution in file OOO
-        // setSolve(m);
-      /*case 'd': // draw the created/solved maze in file III
+      /*case 's': // solve the maze in file III placing solution in file OOO
+        setSolve(m);
+      */
+      case 'd': // draw the created/solved maze in file III
         // number of '----' = (columns * 4) + 1
         setMAZEDashes(m, (getMAZEColumns(m) * 4) + 1);
         // number of '|' = # of columns given
         setMAZEBars(m, getMAZERows(m));
         setDraw(m);
-      */
+        iFile = argv[arg];
+        setInFile(m, iFile);
+        argsUsed = 1;
+        break;
       default:
         fprintf(stderr, "option %s not understood\n", argv[start]);
         exit(-1);
@@ -206,6 +208,14 @@ static void setBuild(MAZE * m) { m->build = true; }
 static void setSolve(MAZE * m) { m->solve = true; }
 
 static void setDraw(MAZE * m) { m->draw = true; }
+
+extern void setMAZEDashes(MAZE * m, int d) { m->numDashes = d; }
+
+extern void setMAZEBars(MAZE * m, int b) { m->numBars = b; }
+
+extern int getMAZEDashes(MAZE * m) { return m->numDashes; }
+
+extern int getMAZEBars(MAZE * m) { return m->numBars; }
 
 extern int getMAZERows(MAZE * m) { return m->rows; }
 
@@ -292,6 +302,18 @@ extern void buildMAZE(MAZE * m) {
   freeSTACK(s);
 }
 
+extern void drawMAZE(MAZE * m) {
+  char * oFile = *(m->outFile);
+  fopen(oFile), "a");
+  fclose();
+}
+
+extern void pushMAZE(MAZE * m) {
+  char * oFile = *(m->outFile);
+  fopen(), "a");
+  fclose();
+}
+
 
 int main(int argc, char **argv) {
   MAZE * m = newMAZE();
@@ -306,10 +328,10 @@ int main(int argc, char **argv) {
   }
   /*if (m->solve == true) {
     solveMAZE(m);
-  }
+  }*/
   if (m->draw == true) {
     drawMAZE(m);
-  }*/
+  }
 
 
 

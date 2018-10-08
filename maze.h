@@ -20,6 +20,8 @@ extern void setMAZESize(MAZE * m, int r, int c);
 extern void setMAZESeed(MAZE * m, int s);
 extern void setMAZEDashes(MAZE * m, int d);
 extern void setMAZEBars(MAZE * m, int b);
+extern int getMAZEDashes(MAZE * m);
+extern int getMAZEBars(MAZE * m);
 extern int getMAZERows(MAZE * m);
 extern int getMAZEColumns(MAZE * m);
 extern void createMatrix(MAZE * m);
@@ -28,7 +30,8 @@ extern CELL * findNeighbor(CELL * c);
 extern void freeMAZE(MAZE * m);
 extern void buildMAZE(MAZE * m);
 // solve maze function
-// draw maze function
+extern void drawMAZE(MAZE * m);
+extern void pushMAZE(MAZE * m);
 
 
 #endif /* maze_h */
