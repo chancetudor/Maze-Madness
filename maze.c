@@ -19,12 +19,6 @@
 
 extern void srandom(unsigned int);
 extern long int random(void);
-static void printName(void);
-static void setInFile(MAZE * m, char * iFile);
-static void setOutFile(MAZE * m, char * oFile);
-static void setBuild(MAZE * m);
-static void setSolve(MAZE * m);
-static void setDraw(MAZE * m);
 
 struct cell {
   int row;
@@ -78,114 +72,7 @@ extern void freeMAZE(MAZE * m) {
  free(m);
 }
 
-static void Fatal(char *fmt, ...) {
-  va_list ap;
-
-  fprintf(stderr,"An error occured: ");
-  va_start(ap, fmt);
-  vfprintf(stderr, fmt, ap);
-  va_end(ap);
-
-  exit(-1);
-}
-
-static void ProcessOptions(MAZE * m, int argc, char **argv) {
-  int start = 0;
-  int argIndex = 1;
-  int argsUsed = 0;
-  char *arg = 0;
-  char *iFile = 0; // create char array to hold name of input file
-  char *oFile = 0; // create char array to hold name of output file
-  int rows = 0;
-  int columns = 0;
-  unsigned int seed = 0;
-
-  while (argIndex < argc && *argv[argIndex] == '-') {
-  /* check if stdin, represented by "-" is an argument */
-  /* if so, the end of options has been reached */
-    argsUsed = 0;
-    start = argIndex;
-
-    /* advance argIndex to point to the first argument to the option */
-    if (argv[start][2] == '\0') {
-      arg = argv[start + 1];
-      ++argIndex;
-    }
-    else {
-      /* first arg is connected to option, so don't advance */
-      arg = argv[start] + 2;
-    }
-
-    switch (argv[start][1]) {
-      /*
-      * when option has an argument, do this
-      *
-      *     examples are -m4096 or -m 4096
-      *
-      *     case 'm':
-      *         MemorySize = atol(arg);
-      *         argsUsed = 1;
-      *         break;
-      * ///////////////////////////////////////////////
-      * when option has multiple arguments, do this
-      *
-      *     examples are -r4096 1280 or -r 4096 1280
-      *
-      *     case 'r':
-      *         Rows = atoi(arg);
-      *         Cols = atoi(argv[argIndex+1]);
-      *         argsUsed = 2;
-      *         break;
-      * ///////////////////////////////////////////////
-      * when option does not have an argument, do this
-      *
-      *     example is -a
-      *
-      *     case 'a':
-      *         PrintActions = 1;
-      *         break;
-      */
-      case 'v': // prints name, then exits
-        printName();
-        exit(0);
-      case 'r': // seeds a pseudo-random number generator
-        seed = atoi(arg);
-        setMAZESeed(m, seed);
-        argsUsed = 1;
-        break;
-      case 'c': // creates new maze
-        rows = atoi(arg);
-        columns = atoi(argv[argIndex + 1]);
-        oFile = argv[argIndex + 2];
-        setMAZESize(m, rows, columns);
-        setOutFile(m, oFile);
-        createMatrix(m);
-        createNeighbors(m);
-        setBuild(m);
-        argsUsed = 3;
-        break;
-      /*case 's': // solve the maze in file III placing solution in file OOO
-        setSolve(m);
-      */
-      case 'd': // draw the created/solved maze in file III
-        // number of '----' = (columns * 4) + 1
-        setMAZEDashes(m, (getMAZEColumns(m) * 4) + 1);
-        // number of '|' = # of columns given
-        setMAZEBars(m, getMAZERows(m));
-        setDraw(m);
-        iFile = arg;
-        setInFile(m, iFile);
-        argsUsed = 1;
-        break;
-      default:
-        fprintf(stderr, "option %s not understood\n", argv[start]);
-        exit(-1);
-    }
-    argIndex += argsUsed;
-  }
-}
-
-static void printName(void) { printf("Written by Chance Tudor\n"); }
+extern void printName(void) { printf("Written by Chance Tudor\n"); }
 
 extern void setMAZESize(MAZE * m, int r, int c) {
   m->rows = r;
@@ -194,17 +81,17 @@ extern void setMAZESize(MAZE * m, int r, int c) {
 
 extern void setMAZESeed(MAZE * m, int s) { m->seed = s; }
 
-static void setOutFile(MAZE * m, char * file) {
+extern void setOutFile(MAZE * m, char * file) {
   m->outFile = file;
 }
 
-static void setInFile(MAZE * m, char * file) { m->inFile = file; }
+extern void setInFile(MAZE * m, char * file) { m->inFile = file; }
 
-static void setBuild(MAZE * m) { m->build = 1; }
+extern void setBuild(MAZE * m) { m->build = 1; }
 
-static void setSolve(MAZE * m) { m->solve = 1; }
+extern void setSolve(MAZE * m) { m->solve = 1; }
 
-static void setDraw(MAZE * m) { m->draw = 1; }
+extern void setDraw(MAZE * m) { m->draw = 1; }
 
 extern void setMAZEDashes(MAZE * m, int d) { m->numDashes = d; }
 
@@ -337,27 +224,4 @@ extern void pushMAZE(MAZE * m) {
 
 
   fclose(outFile);
-}
-
-
-int main(int argc, char **argv) {
-  MAZE * m = newMAZE();
-  // process command line arguments
-  if (argc == 1) { Fatal("%d arguments!\n", argc - 1); } // not enough arguments
-  ProcessOptions(m, argc, argv);
-  // build maze
-  if (m->build == 1) {
-    buildMAZE(m);
-  }
-  /*if (m->solve == 1) {
-    solveMAZE(m);
-  }*/
-  if (m->draw == 1) {
-    drawMAZE(m);
-  }
-
-
-
-  freeMAZE(m);
-  return 0;
 }
