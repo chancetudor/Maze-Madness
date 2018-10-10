@@ -25,6 +25,7 @@ extern int getMAZEBars(MAZE * m);
 extern int getMAZERows(MAZE * m);
 extern int getMAZEColumns(MAZE * m);
 extern void createMatrix(MAZE * m);
+extern void createNeighbors(MAZE * m);
 extern void buildMAZE(MAZE * m);
 extern CELL * findNeighbor(CELL * c);
 extern void freeMAZE(MAZE * m);

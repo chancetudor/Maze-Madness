@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <stdbool.h>
 #include "maze.h"
 #include "cell.h"
 #include "stack.h"
@@ -26,7 +25,6 @@ static void setOutFile(MAZE * m, char * oFile);
 static void setBuild(MAZE * m);
 static void setSolve(MAZE * m);
 static void setDraw(MAZE * m);
-static void createNeighbors(MAZE * m);
 
 struct cell {
   int row;
@@ -47,9 +45,9 @@ struct maze {
   char * outFile;
   int numDashes;
   int numBars;
-  bool build;
-  bool solve;
-  bool draw;
+  int build;
+  int solve;
+  int draw;
 };
 
 extern MAZE * newMAZE(void) {
@@ -63,9 +61,9 @@ extern MAZE * newMAZE(void) {
   m->matrix = 0;
   m->numDashes = 0;
   m->numBars = 0;
-  m->build = false;
-  m->solve = false;
-  m->draw = false;
+  m->build = 0;
+  m->solve = 0;
+  m->draw = 0;
 
   return m;
 }
@@ -91,7 +89,7 @@ static void Fatal(char *fmt, ...) {
   exit(-1);
 }
 
-static int ProcessOptions(MAZE * m, int argc, char **argv) {
+static void ProcessOptions(MAZE * m, int argc, char **argv) {
   int start = 0;
   int argIndex = 1;
   int argsUsed = 0;
@@ -105,8 +103,6 @@ static int ProcessOptions(MAZE * m, int argc, char **argv) {
   while (argIndex < argc && *argv[argIndex] == '-') {
   /* check if stdin, represented by "-" is an argument */
   /* if so, the end of options has been reached */
-    if (argv[argIndex][1] == '\0') { return argIndex; }
-
     argsUsed = 0;
     start = argIndex;
 
@@ -185,11 +181,8 @@ static int ProcessOptions(MAZE * m, int argc, char **argv) {
         fprintf(stderr, "option %s not understood\n", argv[start]);
         exit(-1);
     }
-
     argIndex += argsUsed;
   }
-
-  return argIndex;
 }
 
 static void printName(void) { printf("Written by Chance Tudor\n"); }
@@ -207,11 +200,11 @@ static void setOutFile(MAZE * m, char * file) {
 
 static void setInFile(MAZE * m, char * file) { m->inFile = file; }
 
-static void setBuild(MAZE * m) { m->build = true; }
+static void setBuild(MAZE * m) { m->build = 1; }
 
-static void setSolve(MAZE * m) { m->solve = true; }
+static void setSolve(MAZE * m) { m->solve = 1; }
 
-static void setDraw(MAZE * m) { m->draw = true; }
+static void setDraw(MAZE * m) { m->draw = 1; }
 
 extern void setMAZEDashes(MAZE * m, int d) { m->numDashes = d; }
 
@@ -244,7 +237,7 @@ extern void createMatrix(MAZE * m) {
  }
 }
 
-static void createNeighbors(MAZE * m) {
+extern void createNeighbors(MAZE * m) {
   for (int i = 0; i < getMAZERows(m); i++) {
     for (int j = 0; j < getMAZEColumns(m); j++) {
       CELL * ptr = m->matrix[i][j];
@@ -274,8 +267,6 @@ static void createNeighbors(MAZE * m) {
         setCELLNeighbors(ptr, m->matrix[i][j-1], m->matrix[i-1][j], 0, 0);
       }
       else { // middle of array
-        printf("i = %d\n", i);
-        printf("j = %d\n", j);
         setCELLNeighbors(ptr, m->matrix[i][j-1], m->matrix[i-1][j], m->matrix[i+1][j], m->matrix[i][j+1]);
       }
     }
@@ -284,8 +275,10 @@ static void createNeighbors(MAZE * m) {
 
 extern CELL * findNeighbor(CELL * input) {
   printf("count = %d\n", input->nCount);
+  printf("Curr CELL row = %d || column = %d\n", getRow(input), getColumn(input));
   unsigned int index = random() % input->nCount;
   CELL * val = getCELLNeighbors(input, index);
+
   return val;
 }
 
@@ -296,7 +289,7 @@ extern void buildMAZE(MAZE * m) {
   push(s, curr);
 
   while (sizeSTACK(s) != 0) {
-    curr = peekSTACK(s);
+    curr = (CELL *)peekSTACK(s);
     CELL * neighbor = findNeighbor(curr);
     if (neighbor == 0) {
       pop(s);
@@ -304,24 +297,23 @@ extern void buildMAZE(MAZE * m) {
     else {
       // if path went up
       if (getColumn(neighbor) < getColumn(curr)) {
-        setBottom(neighbor, false);
+        setBottom(neighbor, 0);
       }
       // if path went down
       if (getColumn(neighbor) > getColumn(curr)) {
-        setBottom(curr, false);
+        setBottom(curr, 0);
       }
       // if path went left
       if (getRow(neighbor) < getRow(curr)) {
-        setRight(neighbor, false);
+        setRight(neighbor, 0);
       }
       // if path went right
       if (getRow(neighbor) > getRow(curr)) {
-        setRight(curr, false);
+        setRight(curr, 0);
       }
     }
     push(s, neighbor);
   }
-
   freeSTACK(s);
 }
 
@@ -351,18 +343,16 @@ extern void pushMAZE(MAZE * m) {
 int main(int argc, char **argv) {
   MAZE * m = newMAZE();
   // process command line arguments
-  int argIndex = 0;
   if (argc == 1) { Fatal("%d arguments!\n", argc - 1); } // not enough arguments
-  argIndex = ProcessOptions(m, argc, argv);
-  if (argIndex == argc) { printf("No arguments\n"); }
+  ProcessOptions(m, argc, argv);
   // build maze
-  if (m->build == true) {
+  if (m->build == 1) {
     buildMAZE(m);
   }
-  /*if (m->solve == true) {
+  /*if (m->solve == 1) {
     solveMAZE(m);
   }*/
-  if (m->draw == true) {
+  if (m->draw == 1) {
     drawMAZE(m);
   }
 

@@ -9,76 +9,75 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <assert.h>
 #include <stdarg.h>
 #include "cell.h"
 
-struct neighbor {
-  int row;
-  int column;
-  bool rightWall;
-  bool bottomWall;
-};
-
 struct cell {
   int row;
   int column;
-  bool rightWall;
-  bool bottomWall;
+  int rightWall;
+  int bottomWall;
   int value;
   int nCount;
-  NEIGHBOR * neighbors[4];
+  CELL * neighbors[4];
 };
-
-static NEIGHBOR * newNEIGHBOR(void) {
-  NEIGHBOR * n = malloc(sizeof(NEIGHBOR));
-  n->row = 0;
-  n->column = 0;
-  n->rightWall = true;
-  n->bottomWall = true;
-
-  return n;
-}
 
 extern CELL * newCELL(void) {
   CELL * cell = malloc(sizeof(CELL));
   assert(cell != 0);
   cell->row = 0;
   cell->column = 0;
-  cell->rightWall = true;
-  cell->bottomWall = true;
+  cell->rightWall = 1;
+  cell->bottomWall = 1;
   cell->value = 0;
   cell->nCount = 0;
   for (int i = 0; i < 4; i++) {
-    cell->neighbors[i] = newNEIGHBOR();
+    cell->neighbors[i] = 0;
   }
 
   return cell;
 }
 
-extern void setCELLNeighbors(CELL * ptr, CELL * top, ...) {
+extern void setCELLNeighbors(CELL * ptr, CELL * top, CELL * left, CELL * right, CELL * bottom) {
   printf("In setCELLNeighbors\n");
-  va_list l; // list of function arguments
+  int count = 0; // keep track of number of elements in neighbors array
+  if (top != 0) {
+    ptr->neighbors[0] = top;
+    ++count;
+  }
+  if (left != 0) {
+    ptr->neighbors[1] = left;
+    ++count;
+  }
+  if (right != 0) {
+    ptr->neighbors[2] = right;
+    ++count;
+  }
+  if (bottom != 0) {
+    ptr->neighbors[3] = bottom;
+    ++count;
+  }
+  ptr->nCount = count;
+  printf("Curr CELL row = %d, column = %d\n", getRow(ptr), getColumn(ptr));
+  printf("neighbor count of curr CELL = %d\n", ptr->nCount);
+  /*va_list l; // list of function arguments
   int count = 0; // keep track of number of elements in neighbors array
   int i = 0; // argument number 0-3
   int argCount = 4;
-  printf("top row = %d, top column = %d\n", getRow(top), getColumn(top));
+
   va_start(l, top); // list starts at argument "top"
   while (i < argCount) {
     if (top != 0) { // if arg exists
-      ptr->neighbors[i]->row = top->row;
-      ptr->neighbors[i]->column = top->column;
-      ptr->neighbors[i]->rightWall = top->rightWall;
-      ptr->neighbors[i]->bottomWall = top->bottomWall;
+      ptr->neighbors[i] = top;
       ++count;
       //printf("cell row = %d, cell column = %d\n", top->row, top->column);
     }
-    top = va_arg(l, CELL *); // update next argument
     ++i;
+    top = va_arg(l, CELL *); // update next argument
   }
   va_end(l);
-  ptr->nCount = count;
+  ptr->nCount = count;*/
   printf("End of setCELLNeighbors\n");
 }
 
@@ -91,17 +90,13 @@ extern CELL * getCELLNeighbors(CELL * ptr, unsigned int i) {
   return val;
 }
 
-extern void setRight(CELL * elem, bool right) {
-  elem->rightWall = right;
-}
+extern void setRight(CELL * elem, int right) { elem->rightWall = right; }
 
-extern void setBottom(CELL * elem, bool bottom) {
-  elem->bottomWall = bottom;
-}
+extern void setBottom(CELL * elem, int bottom) { elem->bottomWall = bottom; }
 
-extern bool getRight(CELL * elem) { return elem->rightWall; }
+extern int getRight(CELL * elem) { return elem->rightWall; }
 
-extern bool getBottom(CELL * elem) { return elem->bottomWall; }
+extern int getBottom(CELL * elem) { return elem->bottomWall; }
 
 extern void setCELLLocation(CELL * elem, int r, int c) {
   elem->row = r;
@@ -116,6 +111,4 @@ extern void setValue(CELL * elem, int val) { elem->value = val; }
 
 extern int getValue(CELL * elem) { return elem->value; }
 
-extern void freeCELL(CELL * c) {
-  free(c);
-}
+extern void freeCELL(CELL * c) { free(c); }
