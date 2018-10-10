@@ -13,7 +13,13 @@
 #include <assert.h>
 #include <stdarg.h>
 #include "cell.h"
-#include "da.h"
+
+struct neighbor {
+  int row;
+  int column;
+  bool rightWall;
+  bool bottomWall;
+};
 
 struct cell {
   int row;
@@ -22,8 +28,18 @@ struct cell {
   bool bottomWall;
   int value;
   int nCount;
-  DA * neighbors;
+  NEIGHBOR * neighbors[4];
 };
+
+static NEIGHBOR * newNEIGHBOR(void) {
+  NEIGHBOR * n = malloc(sizeof(NEIGHBOR));
+  n->row = 0;
+  n->column = 0;
+  n->rightWall = true;
+  n->bottomWall = true;
+
+  return n;
+}
 
 extern CELL * newCELL(void) {
   CELL * cell = malloc(sizeof(CELL));
@@ -34,41 +50,45 @@ extern CELL * newCELL(void) {
   cell->bottomWall = true;
   cell->value = 0;
   cell->nCount = 0;
-  cell->neighbors = newDA();
+  for (int i = 0; i < 4; i++) {
+    cell->neighbors[i] = newNEIGHBOR();
+  }
 
   return cell;
 }
 
 extern void setCELLNeighbors(CELL * ptr, CELL * top, ...) {
-  DA * adj = ptr->neighbors;
+  printf("In setCELLNeighbors\n");
   va_list l; // list of function arguments
-  int count = 0;
+  int count = 0; // keep track of number of elements in neighbors array
   int i = 0; // argument number 0-3
   int argCount = 4;
-
-  va_start(l, top); // list starts at argument "arg"
+  printf("top row = %d, top column = %d\n", getRow(top), getColumn(top));
+  va_start(l, top); // list starts at argument "top"
   while (i < argCount) {
-    if (top != 0) {
-      insertDA(adj, i, top); // insert CELL into neighbors DA
+    if (top != 0) { // if arg exists
+      ptr->neighbors[i]->row = top->row;
+      ptr->neighbors[i]->column = top->column;
+      ptr->neighbors[i]->rightWall = top->rightWall;
+      ptr->neighbors[i]->bottomWall = top->bottomWall;
       ++count;
+      //printf("cell row = %d, cell column = %d\n", top->row, top->column);
     }
     top = va_arg(l, CELL *); // update next argument
     ++i;
   }
   va_end(l);
   ptr->nCount = count;
+  printf("End of setCELLNeighbors\n");
 }
 
-extern CELL * getCELLNeighbors(CELL * ptr, int i) {
-  CELL * val = (CELL *)(getDA(ptr->neighbors, i));
-  if (val->rightWall == false || val->bottomWall == false) {
+extern CELL * getCELLNeighbors(CELL * ptr, unsigned int i) {
+  printf("in getCELLNeighbors(); index = %d\n", i);
+  CELL * val = ptr->neighbors[i];
+  if (getRight(val) == false || getBottom(val) == false) {
     return 0;
   }
   return val;
-}
-
-extern int getValue(CELL * elem) {
-  return elem->value;
 }
 
 extern void setRight(CELL * elem, bool right) {
@@ -94,7 +114,8 @@ extern int getColumn(CELL * elem) { return elem->column; }
 
 extern void setValue(CELL * elem, int val) { elem->value = val; }
 
+extern int getValue(CELL * elem) { return elem->value; }
+
 extern void freeCELL(CELL * c) {
-  freeDA(c->neighbors);
   free(c);
 }
