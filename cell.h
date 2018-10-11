@@ -25,8 +25,10 @@ extern int getBottom(CELL * elem);
 extern void setCELLLocation(CELL * elem, int row, int column);
 extern int getRow(CELL * elem);
 extern int getColumn(CELL * elem);
-extern void setCELLNeighbors(CELL * ptr, CELL * top, CELL * left, CELL * right, CELL * bottom);
+extern void setCELLNeighbors(int num, CELL * ptr, CELL * top, .../*CELL * left, CELL * right, CELL * bottom*/);
 extern CELL * getCELLNeighbors(CELL * ptr, unsigned int i);
+extern void setNeighborCount(CELL * ptr, int count);
+extern int getNeighborCount(CELL * ptr);
 extern void freeCELL(CELL * elem);
 
 

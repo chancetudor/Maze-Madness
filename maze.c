@@ -81,9 +81,7 @@ extern void setMAZESize(MAZE * m, int r, int c) {
 
 extern void setMAZESeed(MAZE * m, int s) { m->seed = s; }
 
-extern void setOutFile(MAZE * m, char * file) {
-  m->outFile = file;
-}
+extern void setOutFile(MAZE * m, char * file) { m->outFile = file; }
 
 extern void setInFile(MAZE * m, char * file) { m->inFile = file; }
 
@@ -118,60 +116,69 @@ extern void createMatrix(MAZE * m) {
      // set row and column vals for each new cell
      CELL * ptr = m->matrix[i][j];
      setCELLLocation(ptr, i, j);
-     printf("i = %d || j = %d\n", i, j);
-     printf("curr cell row = %d || curr cell col = %d\n", getRow(ptr), getColumn(ptr));
    }
  }
 }
 
 extern void createNeighbors(MAZE * m) {
+  int num = 0;
   for (int i = 0; i < getMAZERows(m); i++) {
     for (int j = 0; j < getMAZEColumns(m); j++) {
       CELL * ptr = m->matrix[i][j];
       // ptr, top, left, right, bottom
       if (i == 0 && j == 0) { // start of maze
-        setCELLNeighbors(ptr, 0, 0, m->matrix[i+1][j], m->matrix[i][j+1]);
+        num = 2;
+        setCELLNeighbors(num, ptr, /*0, 0,*/ m->matrix[i+1][j], m->matrix[i][j+1]);
       }
       else if ((i == getMAZERows(m) - 1) && j == 0) { // far right of first row
-        setCELLNeighbors(ptr, 0, m->matrix[i-1][j], 0, m->matrix[i][j+1]);
+        num = 2;
+        setCELLNeighbors(num, ptr, /*0,*/ m->matrix[i-1][j], /*0,*/ m->matrix[i][j+1]);
       }
       else if (i == getMAZERows(m) - 1) { // far right of any row
-        setCELLNeighbors(ptr, m->matrix[i][j-1], m->matrix[i-1][j], 0, m->matrix[i][j+1]);
+        num = 3;
+        setCELLNeighbors(num, ptr, m->matrix[i][j-1], m->matrix[i-1][j], /*0,*/ m->matrix[i][j+1]);
       }
       else if (i == 0 && (j == getMAZEColumns(m) - 1)) { // bottom of first col.
-        setCELLNeighbors(ptr, m->matrix[i][j-1], 0, m->matrix[i+1][j], 0);
+        num = 2;
+        setCELLNeighbors(num, ptr, m->matrix[i][j-1], /*0,*/ m->matrix[i+1][j] /*0,*/);
       }
       else if (i == 0) {
-        setCELLNeighbors(ptr, m->matrix[i][j-1], 0, m->matrix[i+1][j], m->matrix[i][j+1]);
+        num = 3;
+        setCELLNeighbors(num, ptr, m->matrix[i][j-1], /*0,*/ m->matrix[i+1][j], m->matrix[i][j+1]);
       }
       else if (j == getMAZEColumns(m) - 1) { // bottom of any col.
-        setCELLNeighbors(ptr, m->matrix[i][j-1], m->matrix[i-1][j], m->matrix[i+1][j], 0);
+        num = 3;
+        setCELLNeighbors(num, ptr, m->matrix[i][j-1], m->matrix[i-1][j], m->matrix[i+1][j] /*0,*/);
       }
       else if (j == 0) {
-        setCELLNeighbors(ptr, 0, m->matrix[i-1][j], m->matrix[i+1][j], m->matrix[i][j+1]);
+        num = 3;
+        setCELLNeighbors(num, ptr, /*0,*/ m->matrix[i-1][j], m->matrix[i+1][j], m->matrix[i][j+1]);
       }
       else if ((i == getMAZERows(m) - 1) && (j == getMAZEColumns(m) - 1)) { // end of maze
-        setCELLNeighbors(ptr, m->matrix[i][j-1], m->matrix[i-1][j], 0, 0);
+        num = 2;
+        setCELLNeighbors(num, ptr, m->matrix[i][j-1], m->matrix[i-1][j] /*0,*/ /*0,*/);
       }
       else { // middle of array
-        setCELLNeighbors(ptr, m->matrix[i][j-1], m->matrix[i-1][j], m->matrix[i+1][j], m->matrix[i][j+1]);
+        num = 4;
+        setCELLNeighbors(num, ptr, m->matrix[i][j-1], m->matrix[i-1][j], m->matrix[i+1][j], m->matrix[i][j+1]);
       }
     }
   }
 }
 
 extern CELL * findNeighbor(CELL * input) {
-  printf("count = %d\n", input->nCount);
-  printf("Curr CELL row = %d || column = %d\n", getRow(input), getColumn(input));
-  unsigned int index = random() % input->nCount;
+  printf("in findNeighbor()\n");
+  printf("\tCurrent CELL row = %d || column = %d\n", getRow(input), getColumn(input));
+  unsigned int index = random() % getNeighborCount(input);
   CELL * val = getCELLNeighbors(input, index);
 
   return val;
 }
 
 extern void buildMAZE(MAZE * m) {
+  printf("in buildMAZE()\n");
   STACK * s = newSTACK(); // FIXME: free!
-  srand(m->seed);
+  srandom(m->seed);
   CELL * curr = m->matrix[0][0];
   push(s, curr);
 
@@ -179,27 +186,33 @@ extern void buildMAZE(MAZE * m) {
     curr = (CELL *)peekSTACK(s);
     CELL * neighbor = findNeighbor(curr);
     if (neighbor == 0) {
+      printf("\tPopping\n");
       pop(s);
     }
     else {
       // if path went up
       if (getColumn(neighbor) < getColumn(curr)) {
+        printf("\tPath went up\n");
         setBottom(neighbor, 0);
       }
       // if path went down
       if (getColumn(neighbor) > getColumn(curr)) {
+        printf("\tPath went down\n");
         setBottom(curr, 0);
       }
       // if path went left
       if (getRow(neighbor) < getRow(curr)) {
+        printf("\tPath went left\n");
         setRight(neighbor, 0);
       }
       // if path went right
       if (getRow(neighbor) > getRow(curr)) {
+        printf("\tPath went right\n");
         setRight(curr, 0);
       }
+      printf("\tPushing neighboring cell\n");
+      push(s, neighbor);
     }
-    push(s, neighbor);
   }
   freeSTACK(s);
 }
@@ -207,20 +220,46 @@ extern void buildMAZE(MAZE * m) {
 extern void drawMAZE(MAZE * m) {
   FILE * outFile;
   char * oFile = m->outFile;
-  outFile = fopen(oFile, "a");
+  outFile = fopen(oFile, "w");
+  // prints initial dashes
+  for (int i = 0; i < getMAZEDashes(m); i++) {
+    fprintf(outFile, "-");
+  }
+  fprintf(outFile, "\n");
+
+  // printing maze
+  // first cell should not have left wall
+  fprintf(outFile, " ");
   for (int i = 0; i < getMAZERows(m); i++) {
     for (int j = 0; j < getMAZEColumns(m); j++) {
-      printf("%d ", getValue(m->matrix[i][j]));
+      if (i != 0 && j == 0) {
+        fprintf(outFile, "|");
+      }
+      // last cell should not have right wall
+      if (i == getMAZERows(m) - 1 && j == getMAZEColumns(m) - 1) {
+        fprintf(outFile, "%d ", getValue(m->matrix[i][j]));
+      }
+      // normal cell
+      else if (i != getMAZERows(m) && j != getMAZEColumns(m)) {
+        fprintf(outFile, "%d|", getValue(m->matrix[i][j]));
+      }
     }
-    printf("\n");
+    fprintf(outFile, "\n");
+    // prints dashes between rows
+    for (int i = 0; i < getMAZEDashes(m); i++) {
+      fprintf(outFile, "-");
+    }
+
+    fprintf(outFile, "\n");
   }
+  fprintf(outFile, "\n");
   fclose(outFile);
 }
 
 extern void pushMAZE(MAZE * m) {
   FILE * outFile;
   char * oFile = m->outFile;
-  outFile = fopen(oFile, "a");
+  outFile = fopen(oFile, "w");
 
 
   fclose(outFile);

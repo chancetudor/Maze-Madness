@@ -39,9 +39,9 @@ extern CELL * newCELL(void) {
   return cell;
 }
 
-extern void setCELLNeighbors(CELL * ptr, CELL * top, CELL * left, CELL * right, CELL * bottom) {
-  printf("In setCELLNeighbors\n");
-  int count = 0; // keep track of number of elements in neighbors array
+extern void setCELLNeighbors(int num, CELL * ptr, CELL * top, .../*CELL * left, CELL * right, CELL * bottom*/) {
+  //printf("In setCELLNeighbors\n");
+  /*int count = 0; // keep track of number of elements in neighbors array
   if (top != 0) {
     ptr->neighbors[0] = top;
     ++count;
@@ -58,36 +58,39 @@ extern void setCELLNeighbors(CELL * ptr, CELL * top, CELL * left, CELL * right, 
     ptr->neighbors[3] = bottom;
     ++count;
   }
-  ptr->nCount = count;
-  printf("Curr CELL row = %d, column = %d\n", getRow(ptr), getColumn(ptr));
-  printf("neighbor count of curr CELL = %d\n", ptr->nCount);
-  /*va_list l; // list of function arguments
+  setNeighborCount(ptr, count);
+  printf("Curr CELL row = %d || column = %d\n", getRow(ptr), getColumn(ptr));*
+  printf("neighbor count of curr CELL = %d\n", getNeighborCount(ptr));*/
+  va_list l; // list of function arguments
   int count = 0; // keep track of number of elements in neighbors array
   int i = 0; // argument number 0-3
-  int argCount = 4;
 
   va_start(l, top); // list starts at argument "top"
-  while (i < argCount) {
-    if (top != 0) { // if arg exists
-      ptr->neighbors[i] = top;
-      ++count;
-      //printf("cell row = %d, cell column = %d\n", top->row, top->column);
-    }
+  while (i < num) {
+    ptr->neighbors[i] = top;
+    ++count;
     ++i;
     top = va_arg(l, CELL *); // update next argument
   }
   va_end(l);
-  ptr->nCount = count;*/
-  printf("End of setCELLNeighbors\n");
+  setNeighborCount(ptr, count);
+  //printf("End of setCELLNeighbors\n");
 }
 
+extern void setNeighborCount(CELL * ptr, int count) { ptr->nCount = count; }
+
+extern int getNeighborCount(CELL * ptr) { return ptr->nCount; }
+
 extern CELL * getCELLNeighbors(CELL * ptr, unsigned int i) {
-  printf("in getCELLNeighbors(); index = %d\n", i);
+  printf("in getCELLNeighbors()\n");
   CELL * val = ptr->neighbors[i];
-  if (getRight(val) == false || getBottom(val) == false) {
+  printf("\tNeighbor CELL row = %d || column = %d\n", getRow(val), getColumn(val));
+  if (getRight(val) == 0 || getBottom(val) == 0) {
+    printf("\tNeighboring cell was visited already\n");
     return 0;
   }
-  return val;
+
+  else { return val; }
 }
 
 extern void setRight(CELL * elem, int right) { elem->rightWall = right; }

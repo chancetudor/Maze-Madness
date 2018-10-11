@@ -1,13 +1,9 @@
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
 #include "maze.h"
 #include "cell.h"
-#include "stack.h"
-#include "queue.h"
-#include "da.h"
 
 extern void srandom(unsigned int);
 
@@ -114,19 +110,19 @@ static void ProcessOptions(MAZE * m, int argc, char **argv) {
         rows = atoi(arg);
         columns = atoi(argv[argIndex + 1]);
         oFile = argv[argIndex + 2];
+        setBuild(m);
         setMAZESize(m, rows, columns);
         setOutFile(m, oFile);
         createMatrix(m);
         createNeighbors(m);
-        setBuild(m);
         argsUsed = 3;
         break;
       /*case 's': // solve the maze in file III placing solution in file OOO
         setSolve(m);
       */
       case 'd': // draw the created/solved maze in file III
-        // number of '----' = (columns * 4) + 1
-        setMAZEDashes(m, (getMAZEColumns(m) * 4) + 1);
+        // number of '----' = (columns * 2) + 1
+        setMAZEDashes(m, (getMAZEColumns(m) * 2 + 1));
         // number of '|' = # of columns given
         setMAZEBars(m, getMAZERows(m));
         setDraw(m);
