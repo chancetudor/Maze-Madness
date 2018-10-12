@@ -20,6 +20,7 @@ struct cell {
   int bottomWall;
   int value;
   int nCount;
+  int visited;
   CELL * neighbors[4];
 };
 
@@ -32,6 +33,7 @@ extern CELL * newCELL(void) {
   cell->bottomWall = 1;
   cell->value = 0;
   cell->nCount = 0;
+  cell->visited = 0;
   for (int i = 0; i < 4; i++) {
     cell->neighbors[i] = 0;
   }
@@ -39,28 +41,8 @@ extern CELL * newCELL(void) {
   return cell;
 }
 
-extern void setCELLNeighbors(int num, CELL * ptr, CELL * top, .../*CELL * left, CELL * right, CELL * bottom*/) {
+extern void setCELLNeighbors(int num, CELL * ptr, CELL * top, ...) {
   //printf("In setCELLNeighbors\n");
-  /*int count = 0; // keep track of number of elements in neighbors array
-  if (top != 0) {
-    ptr->neighbors[0] = top;
-    ++count;
-  }
-  if (left != 0) {
-    ptr->neighbors[1] = left;
-    ++count;
-  }
-  if (right != 0) {
-    ptr->neighbors[2] = right;
-    ++count;
-  }
-  if (bottom != 0) {
-    ptr->neighbors[3] = bottom;
-    ++count;
-  }
-  setNeighborCount(ptr, count);
-  printf("Curr CELL row = %d || column = %d\n", getRow(ptr), getColumn(ptr));*
-  printf("neighbor count of curr CELL = %d\n", getNeighborCount(ptr));*/
   va_list l; // list of function arguments
   int count = 0; // keep track of number of elements in neighbors array
   int i = 0; // argument number 0-3
@@ -85,13 +67,20 @@ extern CELL * getCELLNeighbors(CELL * ptr, unsigned int i) {
   printf("in getCELLNeighbors()\n");
   CELL * val = ptr->neighbors[i];
   printf("\tNeighbor CELL row = %d || column = %d\n", getRow(val), getColumn(val));
-  if (getRight(val) == 0 || getBottom(val) == 0) {
+  if (getBottom(val) == 0 || getRight(val) == 0) {
     printf("\tNeighboring cell was visited already\n");
+    setVisited(val, 1);
     return 0;
   }
 
-  else { return val; }
+  else {
+    return val;
+  }
 }
+
+extern void setVisited(CELL * elem, int v) { elem->visited = v; }
+
+extern int getVisited(CELL * elem) { return elem->visited; }
 
 extern void setRight(CELL * elem, int right) { elem->rightWall = right; }
 

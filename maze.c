@@ -15,7 +15,6 @@
 #include "cell.h"
 #include "stack.h"
 #include "queue.h"
-#include "da.h"
 
 extern void srandom(unsigned int);
 extern long int random(void);
@@ -128,35 +127,35 @@ extern void createNeighbors(MAZE * m) {
       // ptr, top, left, right, bottom
       if (i == 0 && j == 0) { // start of maze
         num = 2;
-        setCELLNeighbors(num, ptr, /*0, 0,*/ m->matrix[i+1][j], m->matrix[i][j+1]);
+        setCELLNeighbors(num, ptr, m->matrix[i+1][j], m->matrix[i][j+1]);
       }
       else if ((i == getMAZERows(m) - 1) && j == 0) { // far right of first row
         num = 2;
-        setCELLNeighbors(num, ptr, /*0,*/ m->matrix[i-1][j], /*0,*/ m->matrix[i][j+1]);
+        setCELLNeighbors(num, ptr, m->matrix[i-1][j], m->matrix[i][j+1]);
       }
       else if (i == getMAZERows(m) - 1) { // far right of any row
         num = 3;
-        setCELLNeighbors(num, ptr, m->matrix[i][j-1], m->matrix[i-1][j], /*0,*/ m->matrix[i][j+1]);
+        setCELLNeighbors(num, ptr, m->matrix[i][j-1], m->matrix[i-1][j], m->matrix[i][j+1]);
       }
       else if (i == 0 && (j == getMAZEColumns(m) - 1)) { // bottom of first col.
         num = 2;
-        setCELLNeighbors(num, ptr, m->matrix[i][j-1], /*0,*/ m->matrix[i+1][j] /*0,*/);
+        setCELLNeighbors(num, ptr, m->matrix[i][j-1], m->matrix[i+1][j]);
       }
       else if (i == 0) {
         num = 3;
-        setCELLNeighbors(num, ptr, m->matrix[i][j-1], /*0,*/ m->matrix[i+1][j], m->matrix[i][j+1]);
+        setCELLNeighbors(num, ptr, m->matrix[i][j-1], m->matrix[i+1][j], m->matrix[i][j+1]);
       }
       else if (j == getMAZEColumns(m) - 1) { // bottom of any col.
         num = 3;
-        setCELLNeighbors(num, ptr, m->matrix[i][j-1], m->matrix[i-1][j], m->matrix[i+1][j] /*0,*/);
+        setCELLNeighbors(num, ptr, m->matrix[i][j-1], m->matrix[i-1][j], m->matrix[i+1][j]);
       }
       else if (j == 0) {
         num = 3;
-        setCELLNeighbors(num, ptr, /*0,*/ m->matrix[i-1][j], m->matrix[i+1][j], m->matrix[i][j+1]);
+        setCELLNeighbors(num, ptr, m->matrix[i-1][j], m->matrix[i+1][j], m->matrix[i][j+1]);
       }
       else if ((i == getMAZERows(m) - 1) && (j == getMAZEColumns(m) - 1)) { // end of maze
         num = 2;
-        setCELLNeighbors(num, ptr, m->matrix[i][j-1], m->matrix[i-1][j] /*0,*/ /*0,*/);
+        setCELLNeighbors(num, ptr, m->matrix[i][j-1], m->matrix[i-1][j]);
       }
       else { // middle of array
         num = 4;
@@ -180,6 +179,7 @@ extern void buildMAZE(MAZE * m) {
   STACK * s = newSTACK(); // FIXME: free!
   srandom(m->seed);
   CELL * curr = m->matrix[0][0];
+  setVisited(curr, 1);
   push(s, curr);
 
   while (sizeSTACK(s) != 0) {
@@ -193,21 +193,25 @@ extern void buildMAZE(MAZE * m) {
       // if path went up
       if (getColumn(neighbor) < getColumn(curr)) {
         printf("\tPath went up\n");
+        printf("\tRemoving bottom of neighbor\n");
         setBottom(neighbor, 0);
       }
       // if path went down
       if (getColumn(neighbor) > getColumn(curr)) {
         printf("\tPath went down\n");
+        printf("\tRemoving bottom of current\n");
         setBottom(curr, 0);
       }
       // if path went left
       if (getRow(neighbor) < getRow(curr)) {
         printf("\tPath went left\n");
+        printf("\tRemoving right of neighbor\n");
         setRight(neighbor, 0);
       }
       // if path went right
       if (getRow(neighbor) > getRow(curr)) {
         printf("\tPath went right\n");
+        printf("\tRemoving right of current\n");
         setRight(curr, 0);
       }
       printf("\tPushing neighboring cell\n");
@@ -215,6 +219,10 @@ extern void buildMAZE(MAZE * m) {
     }
   }
   freeSTACK(s);
+}
+
+extern void solveMAZE(MAZE * m) {
+  return;
 }
 
 extern void drawMAZE(MAZE * m) {
@@ -227,29 +235,42 @@ extern void drawMAZE(MAZE * m) {
   }
   fprintf(outFile, "\n");
 
-  // printing maze
   // first cell should not have left wall
   fprintf(outFile, " ");
-  for (int i = 0; i < getMAZERows(m); i++) {
-    for (int j = 0; j < getMAZEColumns(m); j++) {
+  // printing maze
+  for (int i = 0; i < getMAZERows(m); i++) { // rows
+    for (int j = 0; j < getMAZEColumns(m); j++) { // columns
+      // first cell of every row except first
       if (i != 0 && j == 0) {
         fprintf(outFile, "|");
       }
       // last cell should not have right wall
       if (i == getMAZERows(m) - 1 && j == getMAZEColumns(m) - 1) {
+        //fprintf(outFile, " ");
         fprintf(outFile, "%d ", getValue(m->matrix[i][j]));
       }
       // normal cell
       else if (i != getMAZERows(m) && j != getMAZEColumns(m)) {
-        fprintf(outFile, "%d|", getValue(m->matrix[i][j]));
+        // if right wall exists
+        if (getVisited(m->matrix[i][j]) == 0 && getRight(m->matrix[i][j]) == 1) {
+          //fprintf(outFile, "0|");
+          //fprintf(outFile, "|");
+        }
+        else if (getVisited(m->matrix[i][j]) == 1 && getRight(m->matrix[i][j]) == 1) {
+          fprintf(outFile, " |");
+        }
+        else if (getVisited(m->matrix[i][j]) == 1 && getRight(m->matrix[i][j]) == 0) {
+          fprintf(outFile, " ");
+        }
+        //fprintf(outFile, "%d|", getValue(m->matrix[i][j]));
       }
     }
+    // newline separates each row
     fprintf(outFile, "\n");
     // prints dashes between rows
-    for (int i = 0; i < getMAZEDashes(m); i++) {
+    for (int k = 0; k < getMAZEDashes(m); k++) {
       fprintf(outFile, "-");
     }
-
     fprintf(outFile, "\n");
   }
   fprintf(outFile, "\n");

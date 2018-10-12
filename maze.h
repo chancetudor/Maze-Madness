@@ -36,7 +36,7 @@ extern void buildMAZE(MAZE * m);
 extern CELL * findNeighbor(CELL * c);
 extern void freeMAZE(MAZE * m);
 extern void buildMAZE(MAZE * m);
-// solve maze function
+extern void solveMAZE(MAZE * m);
 extern void drawMAZE(MAZE * m);
 extern void pushMAZE(MAZE * m);
 
