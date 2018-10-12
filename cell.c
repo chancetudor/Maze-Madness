@@ -66,10 +66,11 @@ extern int getNeighborCount(CELL * ptr) { return ptr->nCount; }
 extern CELL * getCELLNeighbors(CELL * ptr, unsigned int i) {
   printf("in getCELLNeighbors()\n");
   CELL * val = ptr->neighbors[i];
+  setVisited(val, 1);
   printf("\tNeighbor CELL row = %d || column = %d\n", getRow(val), getColumn(val));
   if (getBottom(val) == 0 || getRight(val) == 0) {
     printf("\tNeighboring cell was visited already\n");
-    setVisited(val, 1);
+    //setVisited(val, 1);
     return 0;
   }
 

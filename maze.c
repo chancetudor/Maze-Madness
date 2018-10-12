@@ -121,45 +121,67 @@ extern void createMatrix(MAZE * m) {
 
 extern void createNeighbors(MAZE * m) {
   int num = 0;
-  for (int i = 0; i < getMAZERows(m); i++) {
-    for (int j = 0; j < getMAZEColumns(m); j++) {
-      CELL * ptr = m->matrix[i][j];
-      // ptr, top, left, right, bottom
-      if (i == 0 && j == 0) { // start of maze
-        num = 2;
-        setCELLNeighbors(num, ptr, m->matrix[i+1][j], m->matrix[i][j+1]);
+  for (int row = 0; row < getMAZERows(m); row++) { // rows
+    for (int col = 0; col < getMAZEColumns(m); col++) { // columns
+      CELL * ptr = m->matrix[row][col];
+      // curr cell, topN, leftN, rightN, bottomN
+      // start of maze
+      if (row == 0 && col == 0) {
+        num = 2; // two neighbors
+        // right and bottom neighbor
+        setCELLNeighbors(num, ptr, m->matrix[row][col+1], m->matrix[row+1][col]);
       }
-      else if ((i == getMAZERows(m) - 1) && j == 0) { // far right of first row
-        num = 2;
-        setCELLNeighbors(num, ptr, m->matrix[i-1][j], m->matrix[i][j+1]);
+      // end of maze
+      else if (row == getMAZERows(m) - 1 && col == getMAZEColumns(m) - 1) {
+        num = 2; // two neighbors
+        // top and left neighbor
+        setCELLNeighbors(num, ptr, m->matrix[row-1][col], m->matrix[row][col-1]);
       }
-      else if (i == getMAZERows(m) - 1) { // far right of any row
-        num = 3;
-        setCELLNeighbors(num, ptr, m->matrix[i][j-1], m->matrix[i-1][j], m->matrix[i][j+1]);
+      // first row
+      else if (row == 0) {
+        // last column
+        if (col == getMAZEColumns(m) - 1) {
+          num = 2; // two neighbors
+          // left and bottom neighbor
+          setCELLNeighbors(num, ptr, m->matrix[row][col-1], m->matrix[row+1][col]);
+        }
+        else {
+          num = 3; // three neighbors
+          // left, right, and bottom neighbor
+          setCELLNeighbors(num, ptr, m->matrix[row][col-1], m->matrix[row][col+1], m->matrix[row+1][col]);
+        }
       }
-      else if (i == 0 && (j == getMAZEColumns(m) - 1)) { // bottom of first col.
-        num = 2;
-        setCELLNeighbors(num, ptr, m->matrix[i][j-1], m->matrix[i+1][j]);
+      // bottom row
+      else if (row == getMAZERows(m) - 1) {
+        // first column
+        if (col == 0) {
+          num = 2; // two neighbors
+          // top and right neighbor
+          setCELLNeighbors(num, ptr, m->matrix[row-1][col], m->matrix[row][col+1]);
+        }
+        else {
+          num = 3; // three neighbors
+          // top, left, and right neighbor
+          setCELLNeighbors(num, ptr, m->matrix[row-1][col], m->matrix[row][col-1], m->matrix[row][col+1]);
+        }
       }
-      else if (i == 0) {
-        num = 3;
-        setCELLNeighbors(num, ptr, m->matrix[i][j-1], m->matrix[i+1][j], m->matrix[i][j+1]);
+      // first column
+      else if (col == 0) {
+        num = 3; // three neighbors
+        // top, right, and bottom neighbor
+        setCELLNeighbors(num, ptr, m->matrix[row-1][col], m->matrix[row][col+1], m->matrix[row+1][col]);
       }
-      else if (j == getMAZEColumns(m) - 1) { // bottom of any col.
-        num = 3;
-        setCELLNeighbors(num, ptr, m->matrix[i][j-1], m->matrix[i-1][j], m->matrix[i+1][j]);
+      // last column
+      else if (col == getMAZEColumns(m) - 1) {
+        num = 3; // three neighbors
+        // top, left, and bottom neighbor
+        setCELLNeighbors(num, ptr, m->matrix[row-1][col], m->matrix[row][col-1], m->matrix[row+1][col]);
       }
-      else if (j == 0) {
-        num = 3;
-        setCELLNeighbors(num, ptr, m->matrix[i-1][j], m->matrix[i+1][j], m->matrix[i][j+1]);
-      }
-      else if ((i == getMAZERows(m) - 1) && (j == getMAZEColumns(m) - 1)) { // end of maze
-        num = 2;
-        setCELLNeighbors(num, ptr, m->matrix[i][j-1], m->matrix[i-1][j]);
-      }
-      else { // middle of array
+      // cell in middle of array
+      else {
         num = 4;
-        setCELLNeighbors(num, ptr, m->matrix[i][j-1], m->matrix[i-1][j], m->matrix[i+1][j], m->matrix[i][j+1]);
+        // top, left, right, and bottom neighbor
+        setCELLNeighbors(num, ptr, m->matrix[row-1][col], m->matrix[row][col-1], m->matrix[row][col+1], m->matrix[row+1][col]);
       }
     }
   }
@@ -247,7 +269,19 @@ extern void drawMAZE(MAZE * m) {
       // last cell should not have right wall
       if (i == getMAZERows(m) - 1 && j == getMAZEColumns(m) - 1) {
         //fprintf(outFile, " ");
-        fprintf(outFile, "%d ", getValue(m->matrix[i][j]));
+        //fprintf(outFile, "%d ", getValue(m->matrix[i][j]));
+        if (getVisited(m->matrix[i][j]) == 0 && getRight(m->matrix[i][j]) == 1) {
+          //fprintf(outFile, "0|");
+          //fprintf(outFile, "|");
+          fprintf(outFile, "NV|");
+        }
+        else if (getVisited(m->matrix[i][j]) == 1 && getRight(m->matrix[i][j]) == 1) {
+          //fprintf(outFile, " |");
+          fprintf(outFile, "%d|", getValue(m->matrix[i][j]));
+        }
+        else if (getVisited(m->matrix[i][j]) == 1 && getRight(m->matrix[i][j]) == 0) {
+          fprintf(outFile, "%d ", getValue(m->matrix[i][j]));
+        }
       }
       // normal cell
       else if (i != getMAZERows(m) && j != getMAZEColumns(m)) {
@@ -255,12 +289,14 @@ extern void drawMAZE(MAZE * m) {
         if (getVisited(m->matrix[i][j]) == 0 && getRight(m->matrix[i][j]) == 1) {
           //fprintf(outFile, "0|");
           //fprintf(outFile, "|");
+          fprintf(outFile, "NV|");
         }
         else if (getVisited(m->matrix[i][j]) == 1 && getRight(m->matrix[i][j]) == 1) {
-          fprintf(outFile, " |");
+          //fprintf(outFile, " |");
+          fprintf(outFile, "%d|", getValue(m->matrix[i][j]));
         }
         else if (getVisited(m->matrix[i][j]) == 1 && getRight(m->matrix[i][j]) == 0) {
-          fprintf(outFile, " ");
+          fprintf(outFile, "%d ", getValue(m->matrix[i][j]));
         }
         //fprintf(outFile, "%d|", getValue(m->matrix[i][j]));
       }
@@ -273,7 +309,7 @@ extern void drawMAZE(MAZE * m) {
     }
     fprintf(outFile, "\n");
   }
-  fprintf(outFile, "\n");
+  //fprintf(outFile, "\n");
   fclose(outFile);
 }
 
