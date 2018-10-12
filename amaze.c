@@ -122,7 +122,7 @@ static void ProcessOptions(MAZE * m, int argc, char **argv) {
       */
       case 'd': // draw the created/solved maze in file III
         // number of '----' = (columns * 2) + 1
-        setMAZEDashes(m, (getMAZEColumns(m) * 2 + 1));
+        setMAZEDashes(m, (getMAZEColumns(m) * 4 + 1));
         // number of '|' = # of columns given
         setMAZEBars(m, getMAZERows(m));
         setDraw(m);

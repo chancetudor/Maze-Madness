@@ -56,6 +56,11 @@ extern void setCELLNeighbors(int num, CELL * ptr, CELL * top, ...) {
   }
   va_end(l);
   setNeighborCount(ptr, count);
+  printf("Neighbor CELL row = %d || column = %d\n", getRow(ptr), getColumn(ptr));
+  printf("\tneighbor count = %d\n", getNeighborCount(ptr));
+  for (int i = 0; i < getNeighborCount(ptr); i++) {
+    printf("\tneighbor %d row = %d | col = %d \n", i, getRow(ptr->neighbors[i]), getColumn(ptr->neighbors[i]));
+  }
   //printf("End of setCELLNeighbors\n");
 }
 
@@ -64,13 +69,12 @@ extern void setNeighborCount(CELL * ptr, int count) { ptr->nCount = count; }
 extern int getNeighborCount(CELL * ptr) { return ptr->nCount; }
 
 extern CELL * getCELLNeighbors(CELL * ptr, unsigned int i) {
-  printf("in getCELLNeighbors()\n");
+  //printf("in getCELLNeighbors()\n");
   CELL * val = ptr->neighbors[i];
   setVisited(val, 1);
-  printf("\tNeighbor CELL row = %d || column = %d\n", getRow(val), getColumn(val));
+  //printf("\tNeighbor CELL row = %d || column = %d\n", getRow(val), getColumn(val));
   if (getBottom(val) == 0 || getRight(val) == 0) {
-    printf("\tNeighboring cell was visited already\n");
-    //setVisited(val, 1);
+    printf("\t\tNeighboring cell was visited already\n");
     return 0;
   }
 
