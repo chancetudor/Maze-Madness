@@ -7,16 +7,6 @@
 
 extern void srandom(unsigned int);
 
-/*struct cell {
-  int row;
-  int column;
-  bool rightWall;
-  bool bottomWall;
-  int value;
-  int nCount;
-  CELL * neighbors[4];
-};*/
-
 struct maze {
   CELL * (**matrix);
   int rows;
@@ -114,7 +104,7 @@ static void ProcessOptions(MAZE * m, int argc, char **argv) {
         setMAZESize(m, rows, columns);
         setOutFile(m, oFile);
         createMatrix(m);
-        createNeighbors(m);
+        //createNeighbors(m);
         argsUsed = 3;
         break;
       /*case 's': // solve the maze in file III placing solution in file OOO

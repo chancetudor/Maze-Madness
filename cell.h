@@ -9,13 +9,10 @@
 #define __CELL_INCLUDED__
 
 #include <stdio.h>
-#include <stdbool.h>
 
 typedef struct cell CELL;
-typedef struct neighbor NEIGHBOR;
 
 extern CELL * newCELL(void);
-//extern int getWallInfo(CELL * elem);
 extern void setValue(CELL * elem, int val);
 extern int getValue(CELL * elem);
 extern void setRight(CELL * elem, int rightWall);
@@ -25,9 +22,9 @@ extern int getBottom(CELL * elem);
 extern void setCELLLocation(CELL * elem, int row, int column);
 extern int getRow(CELL * elem);
 extern int getColumn(CELL * elem);
-extern void setCELLNeighbors(CELL * ptr, int num, CELL * top, ...);
+extern void setCELLNeighbors(CELL * ptr, int num, CELL **array, CELL * top, ...);
 //extern void removeNeighbor(CELL * ptr, int i);
-extern CELL * getCELLNeighbors(CELL * ptr, unsigned int i);
+//extern CELL * getCELLNeighbors(CELL * ptr, unsigned int i);
 extern void setNeighborCount(CELL * ptr, int count);
 extern int getNeighborCount(CELL * ptr);
 extern void setVisited(CELL * ptr, int v);
