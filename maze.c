@@ -15,6 +15,7 @@
 #include "cell.h"
 #include "stack.h"
 #include "queue.h"
+#include "da.h"
 
 extern void srandom(unsigned int);
 extern long int random(void);
@@ -27,7 +28,6 @@ struct maze {
   char * inFile;
   char * outFile;
   int numDashes;
-  int numBars;
   int build;
   int solve;
   int draw;
@@ -84,11 +84,7 @@ extern void setDraw(MAZE * m) { m->draw = 1; }
 
 extern void setMAZEDashes(MAZE * m, int d) { m->numDashes = d; }
 
-extern void setMAZEBars(MAZE * m, int b) { m->numBars = b; }
-
 extern int getMAZEDashes(MAZE * m) { return m->numDashes; }
-
-extern int getMAZEBars(MAZE * m) { return m->numBars; }
 
 extern int getMAZERows(MAZE * m) { return m->rows; }
 
@@ -113,94 +109,7 @@ extern void createMatrix(MAZE * m) {
  }
 }
 
-/*extern void createNeighbors(MAZE * m) {
-  int num = 0;
-  for (int row = 0; row < getMAZERows(m); row++) { // rows
-    for (int col = 0; col < getMAZEColumns(m); col++) { // columns
-      CELL * ptr = m->matrix[row][col];
-      // start of maze
-      if (row == 0 && col == 0) {
-        num = 2; // two neighbors
-        // right and bottom neighbor
-        setCELLNeighbors(ptr, num, m->matrix[row][col+1], m->matrix[row+1][col]);
-      }
-      // end of maze
-      else if (row == getMAZERows(m) - 1 && col == getMAZEColumns(m) - 1) {
-        num = 2; // two neighbors
-        // top and left neighbor
-        setCELLNeighbors(ptr, num, m->matrix[row-1][col], m->matrix[row][col-1]);
-      }
-      // first row
-      else if (row == 0) {
-        // last column
-        if (col == getMAZEColumns(m) - 1) {
-          num = 2; // two neighbors
-          // left and bottom neighbor
-          setCELLNeighbors(ptr, num, m->matrix[row][col-1], m->matrix[row+1][col]);
-        }
-        else {
-          num = 3; // three neighbors
-          // left, right, and bottom neighbor
-          setCELLNeighbors(ptr, num, m->matrix[row][col-1], m->matrix[row][col+1], m->matrix[row+1][col]);
-        }
-      }
-      // bottom row
-      else if (row == getMAZERows(m) - 1) {
-        // first column
-        if (col == 0) {
-          num = 2; // two neighbors
-          // top and right neighbor
-          setCELLNeighbors(ptr, num, m->matrix[row-1][col], m->matrix[row][col+1]);
-        }
-        else {
-          num = 3; // three neighbors
-          // top, left, and right neighbor
-          setCELLNeighbors(ptr, num, m->matrix[row-1][col], m->matrix[row][col-1], m->matrix[row][col+1]);
-        }
-      }
-      // first column
-      else if (col == 0) {
-        num = 3; // three neighbors
-        // top, right, and bottom neighbor
-        setCELLNeighbors(ptr, num, m->matrix[row-1][col], m->matrix[row][col+1], m->matrix[row+1][col]);
-      }
-      // last column
-      else if (col == getMAZEColumns(m) - 1) {
-        num = 3; // three neighbors
-        // top, left, and bottom neighbor
-        setCELLNeighbors(ptr, num, m->matrix[row-1][col], m->matrix[row][col-1], m->matrix[row+1][col]);
-      }
-      // cell in middle of array
-      else {
-        num = 4;
-        // top, left, right, and bottom neighbor
-        setCELLNeighbors(ptr, num, m->matrix[row-1][col], m->matrix[row][col-1], m->matrix[row][col+1], m->matrix[row+1][col]);
-      }
-    }
-  }
-}*/
-
-//extern CELL * findNeighbor(CELL * currCell, CELL **array) {
-  /*if (getNeighborCount(currCell) <= 0) {
-    return 0;
-  }*/
-  //unsigned int index = random() % getNeighborCount(currCell);
-  //CELL * val = array[index];
-  //printf("neighbor row = %d || col = %d\n", getRow(val), getColumn(val));
-
-  //if (getVisited(val) == 1) {
-    //return 0;
-  //}
-  //if (getBottom(val) == 0 || getRight(val) == 0) {
-    //return 0;
-  //}
-
-  //else {
-    //return val;
-  //}
-//}
-
-extern void createNeighbors(MAZE * m, CELL * curr, CELL **array, int row, int col) {
+extern void createNeighbors(MAZE * m, CELL * curr, DA * array, int row, int col) {
   int n = 0;
   // first row
   if (row == 0) {
@@ -295,8 +204,7 @@ extern void createNeighbors(MAZE * m, CELL * curr, CELL **array, int row, int co
 
 // performs DFS
 extern void buildMAZE(MAZE * m) {
-  printf("in buildMAZE()\n");
-  STACK * s = newSTACK(); // FIXME: free!
+  STACK * s = newSTACK();
   srandom(getMAZESeed(m));
   CELL * curr = m->matrix[0][0];
   setVisited(curr, 1);
@@ -304,101 +212,43 @@ extern void buildMAZE(MAZE * m) {
 
   while (sizeSTACK(s) != 0) {
     curr = (CELL *)peekSTACK(s);
+    //if (getVisited(curr) != 1) { setVisited(curr, 1); }
     int row = getRow(curr);
     int col = getColumn(curr);
-    printf("\tcurr row = %d || col = %d\n", getRow(curr), getColumn(curr));
-    CELL * neighbors[3];
-    // initialize neighbor array
-    for (int i = 0; i < 3; i++) {
-      neighbors[i] = 0;
-    }
+    printf("Curr row = %d || col = %d\n", row, col);
+    DA * neighbors = newDA();
     createNeighbors(m, curr, neighbors, row, col);
-    unsigned int index = 0;
-    index = random() % getNeighborCount(curr);
-    printf("\tindex = %d\n", index);
-    CELL * neighbor = neighbors[index];
-    //printf("\tneighbor row = %d || col = %d\n", getRow(neighbor), getColumn(neighbor));
-    //if (getVisited(neighbor) == 1) { neighbor = 0; }
-    //CELL * neighbor = findNeighbor(curr, neighbors);
+
+    unsigned int index = random() % getNeighborCount(curr);
+    CELL * neighbor = (CELL *)getDA(neighbors, index);
+    printf("\tNeighbor row = %d || col = %d\n", getRow(neighbor), getColumn(neighbor));
+
     // no eligible neighbors, so pop
-    if (neighbor == 0) {
-      printf("\tpopping\n");
+    if (getVisited(neighbor) == 1) {
+      printf("\t\tPOPPING\n");
       pop(s);
     }
     else {
       // if path went up
       if (getRow(neighbor) < getRow(curr)) {
+        printf("Path went up\n");
         setBottom(neighbor, 0);
-        /*int row = getRow(neighbor);
-        int col = getColumn(neighbor);
-        if (row == 0) {
-          if (col == 0 || col == getMAZEColumns(m) - 1) {
-            removeNeighbor(neighbor, 1);
-          }
-          else {
-            removeNeighbor(neighbor, 2);
-          }
-        }
-        else if (col == 0 || col == getMAZEColumns(m) - 1) {
-          removeNeighbor(neighbor, 2);
-        }
-        else { removeNeighbor(neighbor, 3); }*/
-        // remove neighbor's bottom neighbor (curr)
-        // neighbor row != getMAZERows(m) - 1
-          // neighbor could be in row 0 - getMAZERows(m) - 2
       }
       // if path went down
       if (getRow(neighbor) > getRow(curr)) {
+        printf("Path went down\n");
         setBottom(curr, 0);
-        //removeNeighbor(neighbor, 0);
-        // remove neighbor's top neighbor (curr)
-        // neighbor row != 0
-          // neighbor could be in row 1 - getMAZERows(m) - 1
       }
       // if path went left
       if (getColumn(neighbor) < getColumn(curr)) {
+        printf("Path went left\n");
         setRight(neighbor, 0);
-        /*int row = getRow(neighbor);
-        if (row == 0) {
-          removeNeighbor(neighbor, 0);
-        }
-        else {
-          removeNeighbor(neighbor, 1);
-        }*/
-        // remove neighbor's right neighbor (curr)
-        // neighbor col != 0
-          // neighbor could be in column 1 - getMAZEColumns(m) - 1
       }
       // if path went right
       if (getColumn(neighbor) > getColumn(curr)) {
+        printf("Path went right\n");
         setRight(curr, 0);
-        /*int row = getRow(neighbor);
-        int col = getColumn(neighbor);
-        if (row == 0) {
-          if (col == 0) {
-            removeNeighbor(neighbor, 0);
-          }
-          else if (col != getMAZEColumns(m) - 1) {
-            removeNeighbor(neighbor, 1);
-          }
-        }
-        else if (row == getMAZERows(m) - 1) {
-          if (col == 0) {
-            removeNeighbor(neighbor, 1);
-          }
-          else { removeNeighbor(neighbor, 2); }
-        }
-        else if (col == 0) {
-          removeNeighbor(neighbor, 1);
-        }
-        else {
-          removeNeighbor(neighbor, 2);
-        }*/
-        // remove neighbor's left neighbor (curr)
-        // neighbor col != getMAZEColumns(m) - 1
-          // neighbor could be in column 0 - getMAZEColumns(m) - 2
       }
-      printf("pushing\n");
       setVisited(neighbor, 1);
       push(s, neighbor);
     }
@@ -447,14 +297,14 @@ extern void drawMAZE(MAZE * m) {
     for (int j = 0; j < getMAZEColumns(m); j++) {
       // if last cell, do not print right wall
       if (i == getMAZERows(m) - 1 && j == getMAZEColumns(m) - 1) {
-        fprintf(outFile, " %d ", j);
+        fprintf(outFile, "   ");
       }
       // if right wall exists
       else if (getRight(m->matrix[i][j]) == 1) {
-        fprintf(outFile, " %d |", j);
+        fprintf(outFile, "   |");
       }
       else if (getRight(m->matrix[i][j]) == 0) {
-        fprintf(outFile, " %d  ", j);
+        fprintf(outFile, "    ");
       }
       // if bottom wall does not exist
       if (getBottom(m->matrix[i][j]) == 0) {

@@ -104,7 +104,6 @@ static void ProcessOptions(MAZE * m, int argc, char **argv) {
         setMAZESize(m, rows, columns);
         setOutFile(m, oFile);
         createMatrix(m);
-        //createNeighbors(m);
         argsUsed = 3;
         break;
       /*case 's': // solve the maze in file III placing solution in file OOO
@@ -114,7 +113,6 @@ static void ProcessOptions(MAZE * m, int argc, char **argv) {
         // number of '----' = (columns * 2) + 1
         setMAZEDashes(m, (getMAZEColumns(m) * 4 + 1));
         // number of '|' = # of columns given
-        setMAZEBars(m, getMAZERows(m));
         setDraw(m);
         iFile = arg;
         setInFile(m, iFile);
