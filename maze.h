@@ -15,7 +15,6 @@
 typedef struct maze MAZE;
 
 extern MAZE * newMAZE(void);
-extern void allocateMAZE(MAZE * m);
 extern void freeMAZE(MAZE * m);
 extern void setMAZESize(MAZE * m, int r, int c);
 extern void setMAZESeed(MAZE * m, int s);

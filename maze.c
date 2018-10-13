@@ -214,41 +214,59 @@ extern void buildMAZE(MAZE * m) {
     //if (getVisited(curr) != 1) { setVisited(curr, 1); }
     int row = getRow(curr);
     int col = getColumn(curr);
-    //printf("Curr row = %d || col = %d\n", row, col);
+    printf("Curr row, col = [%d %d]\n", row, col);
+    printf("Curr right, bottom wall = [%d %d]\n\n", getRight(curr), getBottom(curr));
     DA * neighbors = newDA();
     createNeighbors(m, curr, neighbors, row, col);
-
-    unsigned int index = random() % getNeighborCount(curr);
-    CELL * neighbor = (CELL *)getDA(neighbors, index);
-    //printf("\tNeighbor row = %d || col = %d\n", getRow(neighbor), getColumn(neighbor));
+    CELL * neighbor;
+    if (getNeighborCount(curr) != 0) {
+      unsigned int index = random() % getNeighborCount(curr);
+      neighbor = (CELL *)getDA(neighbors, index);
+    }
+    else {
+      neighbor = 0;
+      //pop(s);
+    }
+    //unsigned int index = random() % getNeighborCount(curr);
+    //CELL * neighbor = (CELL *)getDA(neighbors, index);
+    //printf("Neighbor row, col = [%d %d]\n", getRow(neighbor), getColumn(neighbor));
+    //printf("Neighbor right, bottom wall = [%d %d]\n\n", getRight(neighbor), getBottom(neighbor));
 
     // no eligible neighbors, so pop
-    if (getVisited(neighbor) == 1) {
-      //printf("\t\tPOPPING\n");
+    if (neighbor != 0 && getVisited(neighbor) == 1) {
+      printf("POPPING\n\n");
+      pop(s);
+    }
+    else if (neighbor == 0) {
       pop(s);
     }
     else {
       // if path went up
       if (getRow(neighbor) < getRow(curr)) {
-        //printf("Path went up\n");
+        printf("\tRemoving bottom of neighbor\n");
         setBottom(neighbor, 0);
+        printf("\tNeighbor right, bottom wall = [%d %d]\n\n", getRight(neighbor), getBottom(neighbor));
       }
       // if path went down
       if (getRow(neighbor) > getRow(curr)) {
-        //printf("Path went down\n");
+        printf("\tRemoving bottom of curr\n");
         setBottom(curr, 0);
+        printf("\tCurr right, bottom wall = [%d %d]\n\n", getRight(curr), getBottom(curr));
       }
       // if path went left
       if (getColumn(neighbor) < getColumn(curr)) {
-        //printf("Path went left\n");
+        printf("\tRemoving right of neighbor\n");
         setRight(neighbor, 0);
+        printf("\tNeighbor right, bottom wall = [%d %d]\n\n", getRight(neighbor), getBottom(neighbor));
       }
       // if path went right
       if (getColumn(neighbor) > getColumn(curr)) {
-        //printf("Path went right\n");
+        printf("\tRemoving right of curr\n");
         setRight(curr, 0);
+        printf("\tCurr right, bottom wall = [%d %d]\n\n", getRight(curr), getBottom(curr));
       }
       setVisited(neighbor, 1);
+      printf("PUSHING\n\n");
       push(s, neighbor);
     }
   }
@@ -310,6 +328,9 @@ extern void drawMAZE(MAZE * m) {
         midDash[lineIndex] = ' ';
         midDash[lineIndex + 1] = ' ';
         midDash[lineIndex + 2] = ' ';
+        lineIndex = lineIndex + 4;
+      }
+      else if (getBottom(m->matrix[i][j]) == 1) {
         lineIndex = lineIndex + 4;
       }
     }

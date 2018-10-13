@@ -45,21 +45,44 @@ extern void setCELLNeighbors(CELL * ptr, int num, DA * array, CELL * top, ...) {
 
   va_start(l, top); // list starts at argument "top"
   while (i < num) {
-    insertDA(array, i, top);
-    ++count;
-    ++i;
-    top = va_arg(l, CELL *); // update next argument
+    if (getVisited(top) == 1) {
+      top = va_arg(l, CELL *); // update next argument
+      ++i;
+    }
+    else {
+      insertDAback(array, top);
+      ++count;
+      ++i;
+      top = va_arg(l, CELL *); // update next argument
+    }
   }
   va_end(l);
 
-  for (int i = 0; i < count; i++) {
+  /*for (int i = 0; i < sizeDA(array); i++) {
     if (getVisited((CELL*)getDA(array, i)) == 1) {
       removeDA(array, i);
       --count;
     }
-  }
+  }*/
+  printf("Neighbors of [%d, %d]:\n", getRow(ptr), getColumn(ptr));
+  //for (int i = 0; i < sizeDA(array); i++) {
+    //printf("\t[%d, %d]\n", getRow((CELL*)getDA(array, i)), getColumn((CELL*)getDA(array, i)));
+  //}
+  printf("Neighbor count = %d\n", count);
   setNeighborCount(ptr, count);
+  printf("Neighbor count after set = %d\n", getNeighborCount(ptr));
 }
+
+/*extern void setCELLNeighbors(CELL * ptr, DA * array, CELL * val) {
+  insertDAback(array, val);
+  setNeighborCount(ptr, sizeDA(array));
+  printf("Neighbors of [%d, %d]:\n", getRow(ptr), getColumn(ptr));
+  for (int i = 0; i < sizeDA(array); i++) {
+    printf("\t[%d, %d]\n", getRow((CELL*)getDA(array, i)), getColumn((CELL*)getDA(array, i)));
+  }
+  printf("nCount of [%d, %d] = %d\n", getRow(ptr), getColumn(ptr), getNeighborCount(ptr));
+  printf("\n");
+}*/
 
 extern void setNeighborCount(CELL * ptr, int count) { ptr->nCount = count; }
 
