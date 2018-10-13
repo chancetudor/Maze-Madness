@@ -18,6 +18,7 @@ extern void allocateMAZE(MAZE * m);
 extern void freeMAZE(MAZE * m);
 extern void setMAZESize(MAZE * m, int r, int c);
 extern void setMAZESeed(MAZE * m, int s);
+extern int getMAZESeed(MAZE * m);
 extern void setMAZEDashes(MAZE * m, int d);
 extern void setMAZEBars(MAZE * m, int b);
 extern void printName(void);

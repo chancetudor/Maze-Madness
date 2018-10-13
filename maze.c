@@ -19,15 +19,16 @@
 extern void srandom(unsigned int);
 extern long int random(void);
 
-struct cell {
+/*struct cell {
   int row;
   int column;
   bool rightWall;
   bool bottomWall;
   int value;
   int nCount;
-  CELL * neighbors[4];
-};
+  //CELL * neighbors[4];
+  DA * neighbors;
+};*/
 
 struct maze {
   CELL * (**matrix);
@@ -79,6 +80,8 @@ extern void setMAZESize(MAZE * m, int r, int c) {
 }
 
 extern void setMAZESeed(MAZE * m, int s) { m->seed = s; }
+
+extern int getMAZESeed(MAZE * m) { return m->seed; }
 
 extern void setOutFile(MAZE * m, char * file) { m->outFile = file; }
 
@@ -202,7 +205,7 @@ extern CELL * findNeighbor(CELL * input) {
 extern void buildMAZE(MAZE * m) {
   printf("in buildMAZE()\n");
   STACK * s = newSTACK(); // FIXME: free!
-  srandom(m->seed);
+  srandom(getMAZESeed(m));
   CELL * curr = m->matrix[0][0];
   setVisited(curr, 1);
   push(s, curr);
@@ -256,27 +259,16 @@ extern void solveMAZE(MAZE * m) {
 }
 
 extern void drawMAZE(MAZE * m) {
-  /*int i = 0;
-  int j = 0;
-  printf("in drawMAZE()\n");
-  for (i = 2; i < getMAZERows(m); i++) {
-    for (j = 0; j < getMAZEColumns(m); j++) {
-      printf("Current CELL row = %d || column = %d\n", i, j);
-      printf("bottom val = %d\n", getBottom(m->matrix[i][j]));
-      printf("right val = %d\n", getRight(m->matrix[i][j]));
-    }
-  }*/
-
   FILE * outFile;
   char * oFile = m->outFile;
   outFile = fopen(oFile, "w");
-
+  // initializes dash array for printing
   char midline[getMAZEDashes(m)];
   for (int z = 0; z < getMAZEDashes(m); z++) {
     midline[z] = '-';
   }
 
-  int lineIndex; //index int to track midline
+  int lineIndex;
 
   // prints top barrier
   for (int z = 0; z < getMAZEDashes(m); z++) {
@@ -316,6 +308,7 @@ extern void drawMAZE(MAZE * m) {
       }
     }
     fprintf(outFile, "\n");
+    // prints barrier between rows
     for (int x = 0; x < getMAZEDashes(m); x++) {
       fprintf(outFile, "%c", midline[x]);
     }

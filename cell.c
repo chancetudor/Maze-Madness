@@ -12,6 +12,7 @@
 #include <assert.h>
 #include <stdarg.h>
 #include "cell.h"
+#include "da.h"
 
 struct cell {
   int row;
@@ -21,7 +22,8 @@ struct cell {
   int value;
   int nCount;
   int visited;
-  CELL * neighbors[4];
+  //CELL * neighbors[4];
+  DA * neighbors;
 };
 
 extern CELL * newCELL(void) {
@@ -34,9 +36,10 @@ extern CELL * newCELL(void) {
   cell->value = 0;
   cell->nCount = 0;
   cell->visited = 0;
-  for (int i = 0; i < 4; i++) {
-    cell->neighbors[i] = 0;
-  }
+  //for (int i = 0; i < 4; i++) {
+    //cell->neighbors[i] = 0;
+  //}
+  cell->neighbors = newDA();
 
   return cell;
 }
@@ -49,7 +52,8 @@ extern void setCELLNeighbors(int num, CELL * ptr, CELL * top, ...) {
 
   va_start(l, top); // list starts at argument "top"
   while (i < num) {
-    ptr->neighbors[i] = top;
+    //ptr->neighbors[i] = top;
+    insertDA(ptr->neighbors, i, top);
     ++count;
     ++i;
     top = va_arg(l, CELL *); // update next argument
@@ -59,7 +63,7 @@ extern void setCELLNeighbors(int num, CELL * ptr, CELL * top, ...) {
   printf("Neighbor CELL row = %d || column = %d\n", getRow(ptr), getColumn(ptr));
   printf("\tneighbor count = %d\n", getNeighborCount(ptr));
   for (int i = 0; i < getNeighborCount(ptr); i++) {
-    printf("\tneighbor %d row = %d | col = %d \n", i, getRow(ptr->neighbors[i]), getColumn(ptr->neighbors[i]));
+    printf("\tneighbor %d row = %d | col = %d \n", i, getRow((CELL *)getDA(ptr->neighbors, i)), getColumn((CELL *)getDA(ptr->neighbors, i)));
   }
   //printf("End of setCELLNeighbors\n");
 }
@@ -70,7 +74,8 @@ extern int getNeighborCount(CELL * ptr) { return ptr->nCount; }
 
 extern CELL * getCELLNeighbors(CELL * ptr, unsigned int i) {
   //printf("in getCELLNeighbors()\n");
-  CELL * val = ptr->neighbors[i];
+  //CELL * val = ptr->neighbors[i];
+  CELL * val = (CELL *)getDA(ptr->neighbors, i);
   setVisited(val, 1);
   //printf("\tNeighbor CELL row = %d || column = %d\n", getRow(val), getColumn(val));
   if (getBottom(val) == 0 || getRight(val) == 0) {
@@ -108,4 +113,7 @@ extern void setValue(CELL * elem, int val) { elem->value = val; }
 
 extern int getValue(CELL * elem) { return elem->value; }
 
-extern void freeCELL(CELL * c) { free(c); }
+extern void freeCELL(CELL * c) {
+  freeDA(c->neighbors);
+  free(c);
+}
