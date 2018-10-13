@@ -193,14 +193,14 @@ extern void createNeighbors(MAZE * m) {
 }
 
 extern CELL * findNeighbor(CELL * currCell) {
-  printf("in findNeighbor()\n");
+  //printf("in findNeighbor()\n");
   //printf("\tCurrent CELL row = %d || column = %d\n", getRow(input), getColumn(input));
   if (getNeighborCount(currCell) <= 0) {
     return 0;
   }
   unsigned int index = random() % getNeighborCount(currCell);
-  printf("\tindex = %d\n", index);
-  printf("\tneighbor count = %d\n", getNeighborCount(currCell));
+  //printf("\tindex = %d\n", index);
+  //printf("\tneighbor count = %d\n", getNeighborCount(currCell));
   CELL * val = getCELLNeighbors(currCell, index);
 
   return val;
@@ -208,28 +208,28 @@ extern CELL * findNeighbor(CELL * currCell) {
 
 // performs DFS
 extern void buildMAZE(MAZE * m) {
-  printf("in buildMAZE()\n");
+  //printf("in buildMAZE()\n");
   STACK * s = newSTACK(); // FIXME: free!
   srandom(getMAZESeed(m));
   CELL * curr = m->matrix[0][0];
   setVisited(curr, 1);
   push(s, curr);
-  printf("\tinitial push\n");
-  CELL * temp = (CELL *)peekSTACK(s);
-  printf("\t\tCurrent CELL row = %d || column = %d\n", getRow(temp), getColumn(temp));
+  //printf("\tinitial push\n");
+  //CELL * temp = (CELL *)peekSTACK(s);
+  //printf("\t\tCurrent CELL row = %d || column = %d\n", getRow(temp), getColumn(temp));
 
   while (sizeSTACK(s) != 0) {
     curr = (CELL *)peekSTACK(s);
     CELL * neighbor = findNeighbor(curr);
     if (neighbor == 0) {
-      printf("\tPopping\n");
+      //printf("\tPopping\n");
       pop(s);
     }
     else {
       // if path went up
       if (getRow(neighbor) < getRow(curr)) {
         setBottom(neighbor, 0);
-        int row = getRow(neighbor);
+        /*int row = getRow(neighbor);
         int col = getColumn(neighbor);
         if (row == 0) {
           if (col == 0 || col == getMAZEColumns(m) - 1) {
@@ -242,7 +242,7 @@ extern void buildMAZE(MAZE * m) {
         else if (col == 0 || col == getMAZEColumns(m) - 1) {
           removeNeighbor(neighbor, 2);
         }
-        else { removeNeighbor(neighbor, 3); }
+        else { removeNeighbor(neighbor, 3); }*/
         // remove neighbor's bottom neighbor (curr)
         // neighbor row != getMAZERows(m) - 1
           // neighbor could be in row 0 - getMAZERows(m) - 2
@@ -250,7 +250,7 @@ extern void buildMAZE(MAZE * m) {
       // if path went down
       if (getRow(neighbor) > getRow(curr)) {
         setBottom(curr, 0);
-        removeNeighbor(neighbor, 0);
+        //removeNeighbor(neighbor, 0);
         // remove neighbor's top neighbor (curr)
         // neighbor row != 0
           // neighbor could be in row 1 - getMAZERows(m) - 1
@@ -258,13 +258,13 @@ extern void buildMAZE(MAZE * m) {
       // if path went left
       if (getColumn(neighbor) < getColumn(curr)) {
         setRight(neighbor, 0);
-        int row = getRow(neighbor);
+        /*int row = getRow(neighbor);
         if (row == 0) {
           removeNeighbor(neighbor, 0);
         }
         else {
           removeNeighbor(neighbor, 1);
-        }
+        }*/
         // remove neighbor's right neighbor (curr)
         // neighbor col != 0
           // neighbor could be in column 1 - getMAZEColumns(m) - 1
@@ -272,7 +272,7 @@ extern void buildMAZE(MAZE * m) {
       // if path went right
       if (getColumn(neighbor) > getColumn(curr)) {
         setRight(curr, 0);
-        int row = getRow(neighbor);
+        /*int row = getRow(neighbor);
         int col = getColumn(neighbor);
         if (row == 0) {
           if (col == 0) {
@@ -293,23 +293,23 @@ extern void buildMAZE(MAZE * m) {
         }
         else {
           removeNeighbor(neighbor, 2);
-        }
+        }*/
         // remove neighbor's left neighbor (curr)
         // neighbor col != getMAZEColumns(m) - 1
           // neighbor could be in column 0 - getMAZEColumns(m) - 2
       }
-      printf("\tPushing neighboring cell\n");
+      //printf("\tPushing neighboring cell\n");
       push(s, neighbor);
-      temp = (CELL *)peekSTACK(s);
-      printf("\t\tCurrent CELL row = %d || column = %d\n", getRow(temp), getColumn(temp));
+      //temp = (CELL *)peekSTACK(s);
+      //printf("\t\tCurrent CELL row = %d || column = %d\n", getRow(temp), getColumn(temp));
     }
   }
   freeSTACK(s);
 }
 
-extern void solveMAZE(MAZE * m) {
+/*extern void solveMAZE(MAZE * m) {
   return;
-}
+}*/
 
 extern void drawMAZE(MAZE * m) {
   FILE * outFile;

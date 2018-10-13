@@ -68,28 +68,28 @@ extern void setCELLNeighbors(CELL * ptr, int num, CELL * top, ...) {
   printf("End of setCELLNeighbors\n");*/
 }
 
-extern void removeNeighbor(CELL * currCell, int index) {
+/*extern void removeNeighbor(CELL * currCell, int index) {
   //removeDA(currCell->neighbors, i);
   for (int i = index; i < getNeighborCount(currCell) - 1; i++) {
     currCell->neighbors[i] = currCell->neighbors[i + 1];
   }
   int newCount = getNeighborCount(currCell) - 1;
   setNeighborCount(currCell, newCount);
-}
+}*/
 
 extern void setNeighborCount(CELL * ptr, int count) { ptr->nCount = count; }
 
 extern int getNeighborCount(CELL * ptr) { return ptr->nCount; }
 
 extern CELL * getCELLNeighbors(CELL * ptr, unsigned int i) {
-  printf("in getCELLNeighbors()\n");
+  //printf("in getCELLNeighbors()\n");
   CELL * val = ptr->neighbors[i];
   //CELL * val = (CELL *)getDA(ptr->neighbors, i);
   setVisited(val, 1);
-  printf("\tNeighbor CELL row = %d || column = %d\n", getRow(val), getColumn(val));
+  //printf("\tNeighbor CELL row = %d || column = %d\n", getRow(val), getColumn(val));
   //printf("\tNeighbor CELL row = %d || column = %d\n", getRow((CELL *)getDA(ptr->neighbors, i)), getColumn((CELL *)getDA(ptr->neighbors, i)));
   if (getBottom(val) == 0 || getRight(val) == 0) {
-    printf("\t\tNeighboring cell was visited already\n");
+    //printf("\t\tNeighboring cell was visited already\n");
     return 0;
   }
 

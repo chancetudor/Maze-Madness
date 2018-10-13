@@ -26,7 +26,7 @@ extern void setCELLLocation(CELL * elem, int row, int column);
 extern int getRow(CELL * elem);
 extern int getColumn(CELL * elem);
 extern void setCELLNeighbors(CELL * ptr, int num, CELL * top, ...);
-extern void removeNeighbor(CELL * ptr, int i);
+//extern void removeNeighbor(CELL * ptr, int i);
 extern CELL * getCELLNeighbors(CELL * ptr, unsigned int i);
 extern void setNeighborCount(CELL * ptr, int count);
 extern int getNeighborCount(CELL * ptr);

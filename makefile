@@ -56,7 +56,7 @@ valgrind : maze #da stack cda queue
 	#valgrind --leak-check=full ./cda
 	#valgrind --leak-check=full ./stack
 	#valgrind --leak-check=full ./queue
-	valgrind --leak-check=full ./maze
+	valgrind --leak-check=full ./amaze
 clean :
 	rm -f $(DAOBJS) $(SOBJS) $(CDAOBJS) $(QOBJS) $(COBJS) $(MOBJS) \
 	da stack cda queue maze
