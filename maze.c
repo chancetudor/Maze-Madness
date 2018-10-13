@@ -317,15 +317,15 @@ extern void drawMAZE(MAZE * m) {
   outFile = fopen(oFile, "w");
 
   // initializes dash array for printing
-  char midline[getMAZEDashes(m)];
-  for (int z = 0; z < getMAZEDashes(m); z++) {
-    midline[z] = '-';
+  char midDash[getMAZEDashes(m)];
+  for (int i = 0; i < getMAZEDashes(m); i++) {
+    midDash[i] = '-';
   }
 
   int lineIndex;
 
   // prints top barrier
-  for (int z = 0; z < getMAZEDashes(m); z++) {
+  for (int i = 0; i < getMAZEDashes(m); i++) {
     fprintf(outFile, "-");
   }
 
@@ -334,9 +334,8 @@ extern void drawMAZE(MAZE * m) {
   // iterates through rows
   for (int i = 0; i < getMAZERows(m); i++) {
     // reinitializes dash array for printing
-    char midline[getMAZEDashes(m)];
-    for (int z = 0; z < getMAZEDashes(m); z++) {
-      midline[z] = '-';
+    for (int k = 0; k < getMAZEDashes(m); k++) {
+      midDash[k] = '-';
     }
 
     // if not start, print left wall
@@ -360,9 +359,9 @@ extern void drawMAZE(MAZE * m) {
       }
       // if bottom wall does not exist
       if (getBottom(m->matrix[i][j]) == 0) {
-        midline[lineIndex] = ' ';
-        midline[lineIndex + 1] = ' ';
-        midline[lineIndex + 2] = ' ';
+        midDash[lineIndex] = ' ';
+        midDash[lineIndex + 1] = ' ';
+        midDash[lineIndex + 2] = ' ';
         lineIndex = lineIndex + 4;
       }
     }
@@ -370,7 +369,7 @@ extern void drawMAZE(MAZE * m) {
 
     // prints barrier between rows
     for (int x = 0; x < getMAZEDashes(m); x++) {
-      fprintf(outFile, "%c", midline[x]);
+      fprintf(outFile, "%c", midDash[x]);
     }
     fprintf(outFile, "\n");
   }

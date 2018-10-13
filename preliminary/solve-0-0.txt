@@ -1,1 +1,0 @@
--r 2777 -c 83 16 unready.maze -d ready.maze -s unready.maze ready.maze
