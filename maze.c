@@ -43,7 +43,6 @@ extern MAZE * newMAZE(void) {
   m->outFile = 0;
   m->matrix = 0;
   m->numDashes = 0;
-  m->numBars = 0;
   m->build = 0;
   m->solve = 0;
   m->draw = 0;
@@ -215,38 +214,38 @@ extern void buildMAZE(MAZE * m) {
     //if (getVisited(curr) != 1) { setVisited(curr, 1); }
     int row = getRow(curr);
     int col = getColumn(curr);
-    printf("Curr row = %d || col = %d\n", row, col);
+    //printf("Curr row = %d || col = %d\n", row, col);
     DA * neighbors = newDA();
     createNeighbors(m, curr, neighbors, row, col);
 
     unsigned int index = random() % getNeighborCount(curr);
     CELL * neighbor = (CELL *)getDA(neighbors, index);
-    printf("\tNeighbor row = %d || col = %d\n", getRow(neighbor), getColumn(neighbor));
+    //printf("\tNeighbor row = %d || col = %d\n", getRow(neighbor), getColumn(neighbor));
 
     // no eligible neighbors, so pop
     if (getVisited(neighbor) == 1) {
-      printf("\t\tPOPPING\n");
+      //printf("\t\tPOPPING\n");
       pop(s);
     }
     else {
       // if path went up
       if (getRow(neighbor) < getRow(curr)) {
-        printf("Path went up\n");
+        //printf("Path went up\n");
         setBottom(neighbor, 0);
       }
       // if path went down
       if (getRow(neighbor) > getRow(curr)) {
-        printf("Path went down\n");
+        //printf("Path went down\n");
         setBottom(curr, 0);
       }
       // if path went left
       if (getColumn(neighbor) < getColumn(curr)) {
-        printf("Path went left\n");
+        //printf("Path went left\n");
         setRight(neighbor, 0);
       }
       // if path went right
       if (getColumn(neighbor) > getColumn(curr)) {
-        printf("Path went right\n");
+        //printf("Path went right\n");
         setRight(curr, 0);
       }
       setVisited(neighbor, 1);

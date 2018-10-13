@@ -15,7 +15,6 @@ struct maze {
   char * inFile;
   char * outFile;
   int numDashes;
-  int numBars;
   int build;
   int solve;
   int draw;
