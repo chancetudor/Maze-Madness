@@ -211,11 +211,9 @@ extern void buildMAZE(MAZE * m) {
 
   while (sizeSTACK(s) != 0) {
     curr = (CELL *)peekSTACK(s);
-    //if (getVisited(curr) != 1) { setVisited(curr, 1); }
     int row = getRow(curr);
     int col = getColumn(curr);
-    printf("Curr row, col = [%d %d]\n", row, col);
-    printf("Curr right, bottom wall = [%d %d]\n\n", getRight(curr), getBottom(curr));
+
     DA * neighbors = newDA();
     createNeighbors(m, curr, neighbors, row, col);
     CELL * neighbor;
@@ -225,16 +223,10 @@ extern void buildMAZE(MAZE * m) {
     }
     else {
       neighbor = 0;
-      //pop(s);
     }
-    //unsigned int index = random() % getNeighborCount(curr);
-    //CELL * neighbor = (CELL *)getDA(neighbors, index);
-    //printf("Neighbor row, col = [%d %d]\n", getRow(neighbor), getColumn(neighbor));
-    //printf("Neighbor right, bottom wall = [%d %d]\n\n", getRight(neighbor), getBottom(neighbor));
 
     // no eligible neighbors, so pop
     if (neighbor != 0 && getVisited(neighbor) == 1) {
-      printf("POPPING\n\n");
       pop(s);
     }
     else if (neighbor == 0) {
@@ -243,30 +235,21 @@ extern void buildMAZE(MAZE * m) {
     else {
       // if path went up
       if (getRow(neighbor) < getRow(curr)) {
-        printf("\tRemoving bottom of neighbor\n");
         setBottom(neighbor, 0);
-        printf("\tNeighbor right, bottom wall = [%d %d]\n\n", getRight(neighbor), getBottom(neighbor));
       }
       // if path went down
       if (getRow(neighbor) > getRow(curr)) {
-        printf("\tRemoving bottom of curr\n");
         setBottom(curr, 0);
-        printf("\tCurr right, bottom wall = [%d %d]\n\n", getRight(curr), getBottom(curr));
       }
       // if path went left
       if (getColumn(neighbor) < getColumn(curr)) {
-        printf("\tRemoving right of neighbor\n");
         setRight(neighbor, 0);
-        printf("\tNeighbor right, bottom wall = [%d %d]\n\n", getRight(neighbor), getBottom(neighbor));
       }
       // if path went right
       if (getColumn(neighbor) > getColumn(curr)) {
-        printf("\tRemoving right of curr\n");
         setRight(curr, 0);
-        printf("\tCurr right, bottom wall = [%d %d]\n\n", getRight(curr), getBottom(curr));
       }
       setVisited(neighbor, 1);
-      printf("PUSHING\n\n");
       push(s, neighbor);
     }
   }
