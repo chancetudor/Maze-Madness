@@ -118,6 +118,8 @@ extern void createMatrix(MAZE * m) {
      // set row and column vals for each new cell
      CELL * ptr = m->matrix[i][j];
      setCELLLocation(ptr, i, j);
+     // end of maze should not have right wall
+     //if (i == getMAZERows(m) - 1 && j == getMAZEColumns(m) - 1) { setRight(ptr, 0); }
    }
  }
 }
@@ -132,13 +134,13 @@ extern void createNeighbors(MAZE * m) {
       if (row == 0 && col == 0) {
         num = 2; // two neighbors
         // right and bottom neighbor
-        setCELLNeighbors(num, ptr, m->matrix[row][col+1], m->matrix[row+1][col]);
+        setCELLNeighbors(ptr, num, m->matrix[row][col+1], m->matrix[row+1][col]);
       }
       // end of maze
       else if (row == getMAZERows(m) - 1 && col == getMAZEColumns(m) - 1) {
         num = 2; // two neighbors
         // top and left neighbor
-        setCELLNeighbors(num, ptr, m->matrix[row-1][col], m->matrix[row][col-1]);
+        setCELLNeighbors(ptr, num, m->matrix[row-1][col], m->matrix[row][col-1]);
       }
       // first row
       else if (row == 0) {
@@ -146,12 +148,12 @@ extern void createNeighbors(MAZE * m) {
         if (col == getMAZEColumns(m) - 1) {
           num = 2; // two neighbors
           // left and bottom neighbor
-          setCELLNeighbors(num, ptr, m->matrix[row][col-1], m->matrix[row+1][col]);
+          setCELLNeighbors(ptr, num, m->matrix[row][col-1], m->matrix[row+1][col]);
         }
         else {
           num = 3; // three neighbors
           // left, right, and bottom neighbor
-          setCELLNeighbors(num, ptr, m->matrix[row][col-1], m->matrix[row][col+1], m->matrix[row+1][col]);
+          setCELLNeighbors(ptr, num, m->matrix[row][col-1], m->matrix[row][col+1], m->matrix[row+1][col]);
         }
       }
       // bottom row
@@ -160,43 +162,46 @@ extern void createNeighbors(MAZE * m) {
         if (col == 0) {
           num = 2; // two neighbors
           // top and right neighbor
-          setCELLNeighbors(num, ptr, m->matrix[row-1][col], m->matrix[row][col+1]);
+          setCELLNeighbors(ptr, num, m->matrix[row-1][col], m->matrix[row][col+1]);
         }
         else {
           num = 3; // three neighbors
           // top, left, and right neighbor
-          setCELLNeighbors(num, ptr, m->matrix[row-1][col], m->matrix[row][col-1], m->matrix[row][col+1]);
+          setCELLNeighbors(ptr, num, m->matrix[row-1][col], m->matrix[row][col-1], m->matrix[row][col+1]);
         }
       }
       // first column
       else if (col == 0) {
         num = 3; // three neighbors
         // top, right, and bottom neighbor
-        setCELLNeighbors(num, ptr, m->matrix[row-1][col], m->matrix[row][col+1], m->matrix[row+1][col]);
+        setCELLNeighbors(ptr, num, m->matrix[row-1][col], m->matrix[row][col+1], m->matrix[row+1][col]);
       }
       // last column
       else if (col == getMAZEColumns(m) - 1) {
         num = 3; // three neighbors
         // top, left, and bottom neighbor
-        setCELLNeighbors(num, ptr, m->matrix[row-1][col], m->matrix[row][col-1], m->matrix[row+1][col]);
+        setCELLNeighbors(ptr, num, m->matrix[row-1][col], m->matrix[row][col-1], m->matrix[row+1][col]);
       }
       // cell in middle of array
       else {
         num = 4;
         // top, left, right, and bottom neighbor
-        setCELLNeighbors(num, ptr, m->matrix[row-1][col], m->matrix[row][col-1], m->matrix[row][col+1], m->matrix[row+1][col]);
+        setCELLNeighbors(ptr, num, m->matrix[row-1][col], m->matrix[row][col-1], m->matrix[row][col+1], m->matrix[row+1][col]);
       }
     }
   }
 }
 
-extern CELL * findNeighbor(CELL * input) {
+extern CELL * findNeighbor(CELL * currCell) {
   printf("in findNeighbor()\n");
   //printf("\tCurrent CELL row = %d || column = %d\n", getRow(input), getColumn(input));
-  unsigned int index = random() % getNeighborCount(input);
+  if (getNeighborCount(currCell) <= 0) {
+    return 0;
+  }
+  unsigned int index = random() % getNeighborCount(currCell);
   printf("\tindex = %d\n", index);
-  printf("\tneighbor count = %d\n", getNeighborCount(input));
-  CELL * val = getCELLNeighbors(input, index);
+  printf("\tneighbor count = %d\n", getNeighborCount(currCell));
+  CELL * val = getCELLNeighbors(currCell, index);
 
   return val;
 }
@@ -223,27 +228,75 @@ extern void buildMAZE(MAZE * m) {
     else {
       // if path went up
       if (getRow(neighbor) < getRow(curr)) {
-        //printf("\tPath went up\n");
-        //printf("\tRemoving bottom of neighbor\n");
         setBottom(neighbor, 0);
+        int row = getRow(neighbor);
+        int col = getColumn(neighbor);
+        if (row == 0) {
+          if (col == 0 || col == getMAZEColumns(m) - 1) {
+            removeNeighbor(neighbor, 1);
+          }
+          else {
+            removeNeighbor(neighbor, 2);
+          }
+        }
+        else if (col == 0 || col == getMAZEColumns(m) - 1) {
+          removeNeighbor(neighbor, 2);
+        }
+        else { removeNeighbor(neighbor, 3); }
+        // remove neighbor's bottom neighbor (curr)
+        // neighbor row != getMAZERows(m) - 1
+          // neighbor could be in row 0 - getMAZERows(m) - 2
       }
       // if path went down
       if (getRow(neighbor) > getRow(curr)) {
-        //printf("\tPath went down\n");
-        //printf("\tRemoving bottom of current\n");
         setBottom(curr, 0);
+        removeNeighbor(neighbor, 0);
+        // remove neighbor's top neighbor (curr)
+        // neighbor row != 0
+          // neighbor could be in row 1 - getMAZERows(m) - 1
       }
       // if path went left
       if (getColumn(neighbor) < getColumn(curr)) {
-        //printf("\tPath went left\n");
-        //printf("\tRemoving right of neighbor\n");
         setRight(neighbor, 0);
+        int row = getRow(neighbor);
+        if (row == 0) {
+          removeNeighbor(neighbor, 0);
+        }
+        else {
+          removeNeighbor(neighbor, 1);
+        }
+        // remove neighbor's right neighbor (curr)
+        // neighbor col != 0
+          // neighbor could be in column 1 - getMAZEColumns(m) - 1
       }
       // if path went right
       if (getColumn(neighbor) > getColumn(curr)) {
-        //printf("\tPath went right\n");
-        //printf("\tRemoving right of current\n");
         setRight(curr, 0);
+        int row = getRow(neighbor);
+        int col = getColumn(neighbor);
+        if (row == 0) {
+          if (col == 0) {
+            removeNeighbor(neighbor, 0);
+          }
+          else if (col != getMAZEColumns(m) - 1) {
+            removeNeighbor(neighbor, 1);
+          }
+        }
+        else if (row == getMAZERows(m) - 1) {
+          if (col == 0) {
+            removeNeighbor(neighbor, 1);
+          }
+          else { removeNeighbor(neighbor, 2); }
+        }
+        else if (col == 0) {
+          removeNeighbor(neighbor, 1);
+        }
+        else {
+          removeNeighbor(neighbor, 2);
+        }
+        // remove neighbor's left neighbor (curr)
+        // neighbor col != getMAZEColumns(m) - 1
+          // neighbor could be in column 0 - getMAZEColumns(m) - 2
       }
       printf("\tPushing neighboring cell\n");
       push(s, neighbor);
@@ -262,6 +315,7 @@ extern void drawMAZE(MAZE * m) {
   FILE * outFile;
   char * oFile = m->outFile;
   outFile = fopen(oFile, "w");
+
   // initializes dash array for printing
   char midline[getMAZEDashes(m)];
   for (int z = 0; z < getMAZEDashes(m); z++) {
@@ -274,13 +328,17 @@ extern void drawMAZE(MAZE * m) {
   for (int z = 0; z < getMAZEDashes(m); z++) {
     fprintf(outFile, "-");
   }
+
   fprintf(outFile, "\n");
+
   // iterates through rows
   for (int i = 0; i < getMAZERows(m); i++) {
+    // reinitializes dash array for printing
     char midline[getMAZEDashes(m)];
     for (int z = 0; z < getMAZEDashes(m); z++) {
       midline[z] = '-';
     }
+
     // if not start, print left wall
     if (i != 0) { fprintf(outFile, "|"); }
     // if start, do not print left wall
@@ -289,11 +347,12 @@ extern void drawMAZE(MAZE * m) {
     lineIndex = 1;
     // iterates through columns
     for (int j = 0; j < getMAZEColumns(m); j++) {
-      //printf("Current CELL row = %d || column = %d\n", i, j);
-      //printf("\tright val = %d\n", getRight(m->matrix[i][j]));
-      //printf("\tbottom val = %d\n", getBottom(m->matrix[i][j]));
+      // if last cell, do not print right wall
+      if (i == getMAZERows(m) - 1 && j == getMAZEColumns(m) - 1) {
+        fprintf(outFile, " %d ", j);
+      }
       // if right wall exists
-      if (getRight(m->matrix[i][j]) == 1) {
+      else if (getRight(m->matrix[i][j]) == 1) {
         fprintf(outFile, " %d |", j);
       }
       else if (getRight(m->matrix[i][j]) == 0) {
@@ -308,6 +367,7 @@ extern void drawMAZE(MAZE * m) {
       }
     }
     fprintf(outFile, "\n");
+
     // prints barrier between rows
     for (int x = 0; x < getMAZEDashes(m); x++) {
       fprintf(outFile, "%c", midline[x]);

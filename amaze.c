@@ -7,7 +7,7 @@
 
 extern void srandom(unsigned int);
 
-struct cell {
+/*struct cell {
   int row;
   int column;
   bool rightWall;
@@ -15,7 +15,7 @@ struct cell {
   int value;
   int nCount;
   CELL * neighbors[4];
-};
+};*/
 
 struct maze {
   CELL * (**matrix);
