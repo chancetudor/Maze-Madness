@@ -38,6 +38,7 @@ extern void buildMAZE(MAZE * m);
 extern void solveMAZE(MAZE * m);
 extern void drawMAZE(MAZE * m);
 extern void pushMAZE(MAZE * m);
+extern MAZE * pullMAZE(MAZE * m);
 
 
 #endif /* maze_h */

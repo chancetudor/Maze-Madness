@@ -15,50 +15,50 @@
 #include "da.h"
 
 struct cell {
-  int row;
-  int column;
-  int rightWall;
-  int bottomWall;
-  int value;
-  int nCount;
-  int visited;
+    int row;
+    int column;
+    int rightWall;
+    int bottomWall;
+    int value;
+    int nCount;
+    int visited;
 };
 
 extern CELL * newCELL(void) {
-  CELL * cell = malloc(sizeof(CELL));
-  assert(cell != 0);
-  cell->row = 0;
-  cell->column = 0;
-  cell->rightWall = 1;
-  cell->bottomWall = 1;
-  cell->value = 0;
-  cell->nCount = 0;
-  cell->visited = 0;
+    CELL * cell = malloc(sizeof(CELL));
+    assert(cell != 0);
+    cell->row = 0;
+    cell->column = 0;
+    cell->rightWall = 1;
+    cell->bottomWall = 1;
+    cell->value = 0;
+    cell->nCount = 0;
+    cell->visited = 0;
 
-  return cell;
+    return cell;
 }
 
 extern void setCELLNeighbors(CELL * ptr, int num, DA * array, CELL * top, ...) {
-  va_list l; // list of function arguments
-  int count = 0; // keep track of number of elements in neighbors array
-  int i = 0; // argument number 0-3
+    va_list l; // list of function arguments
+    int count = 0; // keep track of number of elements in neighbors array
+    int i = 0; // argument number 0-3
 
-  va_start(l, top); // list starts at argument "top"
-  while (i < num) {
-    if (getVisited(top) == 1) {
-      top = va_arg(l, CELL *); // update next argument
-      ++i;
+    va_start(l, top); // list starts at argument "top"
+    while (i < num) {
+        if (getVisited(top) == 1) {
+            top = va_arg(l, CELL *); // update next argument
+            ++i;
+        }
+        else {
+            insertDAback(array, top);
+            ++count;
+            ++i;
+            top = va_arg(l, CELL *); // update next argument
+        }
     }
-    else {
-      insertDAback(array, top);
-      ++count;
-      ++i;
-      top = va_arg(l, CELL *); // update next argument
-    }
-  }
-  va_end(l);
+    va_end(l);
 
-  setNeighborCount(ptr, count);
+    setNeighborCount(ptr, count);
 }
 
 extern void setNeighborCount(CELL * ptr, int count) { ptr->nCount = count; }
@@ -78,8 +78,8 @@ extern int getRight(CELL * elem) { return elem->rightWall; }
 extern int getBottom(CELL * elem) { return elem->bottomWall; }
 
 extern void setCELLLocation(CELL * elem, int r, int c) {
-  elem->row = r;
-  elem->column = c;
+    elem->row = r;
+    elem->column = c;
 }
 
 extern int getRow(CELL * elem) { return elem->row; }
