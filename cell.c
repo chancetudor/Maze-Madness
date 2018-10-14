@@ -22,6 +22,7 @@ struct cell {
     int value;
     int nCount;
     int visited;
+    int examined;
 };
 
 extern CELL * newCELL(void) {
@@ -31,7 +32,7 @@ extern CELL * newCELL(void) {
     cell->column = 0;
     cell->rightWall = 1;
     cell->bottomWall = 1;
-    cell->value = 0;
+    cell->value = -1;
     cell->nCount = 0;
     cell->visited = 0;
 
@@ -45,6 +46,7 @@ extern void setCELLNeighbors(CELL * ptr, int num, DA * array, CELL * top, ...) {
 
     va_start(l, top); // list starts at argument "top"
     while (i < num) {
+        // if neighbor has already been visited, do not add to neighbors array
         if (getVisited(top) == 1) {
             top = va_arg(l, CELL *); // update next argument
             ++i;
@@ -68,6 +70,10 @@ extern int getNeighborCount(CELL * ptr) { return ptr->nCount; }
 extern void setVisited(CELL * elem, int v) { elem->visited = v; }
 
 extern int getVisited(CELL * elem) { return elem->visited; }
+
+extern void setExamined(CELL * ptr, int e) { ptr->examined = e; }
+
+extern int getExamined(CELL * ptr) { return ptr->examined; }
 
 extern void setRight(CELL * elem, int right) { elem->rightWall = right; }
 

@@ -106,12 +106,15 @@ static void ProcessOptions(MAZE * m, int argc, char **argv) {
                 createMatrix(m);
                 argsUsed = 3;
                 break;
-                /*case 's': // solve the maze in file III placing solution in file OOO
-                 setSolve(m);
-              */
+            case 's': // solve the maze in file III placing solution in file OOO
+                setSolve(m);
+                iFile = arg;
+                oFile = argv[argIndex + 1];
+                setInFile(m, iFile);
+                setOutFile(m, oFile);
+                argsUsed = 2;
+                break;
             case 'd': // draw the created/solved maze in file III
-                // number of '----' = (columns * 4) + 1
-                //setMAZEDashes(m, (getMAZEColumns(m) * 4 + 1));
                 setDraw(m);
                 iFile = arg;
                 setInFile(m, iFile);
@@ -135,15 +138,17 @@ int main(int argc, char **argv) {
         buildMAZE(m);
         pushMAZE(m);
     }
-    /*if (m->solve == 1) {
-     solveMAZE(m);
-     }*/
+    // solve maze
+    if (m->solve == 1) {
+        MAZE * newMaze = pullMAZE(m);
+        setOutFile(newMaze, m->outFile);
+        solveMAZE(newMaze);
+    }
+    // draw maze
     if (m->draw == 1) {
         MAZE * newMaze = pullMAZE(m);
         drawMAZE(newMaze);
     }
-
-
 
     freeMAZE(m);
     return 0;
