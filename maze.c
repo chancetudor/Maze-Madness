@@ -305,7 +305,8 @@ extern void solveMAZE(MAZE * m) {
 				dequeue(q);
 		}
 		// draws maze
-		FILE * outFile;
+		drawSolvedMAZE(m);
+		/*FILE * outFile;
 		char * oFile = m->outFile;
 		outFile = fopen(oFile, "w");
 		if (outFile == NULL) {
@@ -321,11 +322,11 @@ extern void solveMAZE(MAZE * m) {
 		int lineIndex;
 
 		// prints top barrier
-		for (int i = 0; i < getMAZEDashes(m); i++) {
-				fprintf(outFile, "-");
-		}
+		//for (int i = 0; i < getMAZEDashes(m); i++) {
+			//	fprintf(outFile, "-");
+		//}
 
-		fprintf(outFile, "\n");
+		//fprintf(outFile, "\n");
 
 		// iterates through rows
 		for (int i = 0; i < getMAZERows(m); i++) {
@@ -374,8 +375,82 @@ extern void solveMAZE(MAZE * m) {
 						fprintf(outFile, "%c", midDash[x]);
 				}
 				fprintf(outFile, "\n");
-		}
-		fclose(outFile);
+		}*/
+		//fclose(outFile);
+}
+
+extern void drawSolvedMAZE(MAZE * m) {
+	FILE * outFile;
+	char * oFile = m->outFile;
+	outFile = fopen(oFile, "w");
+	if (outFile == NULL) {
+			printf("Error in solveMAZE(): file %s unable to be opened\n", oFile);
+			exit(1);
+	}
+	// initializes dash array for printing
+	char midDash[getMAZEDashes(m)];
+	//for (int i = 0; i < getMAZEDashes(m); i++) {
+		//	midDash[i] = '-';
+	//}
+
+	int lineIndex;
+
+	// prints top barrier
+	//for (int i = 0; i < getMAZEDashes(m); i++) {
+		//	fprintf(outFile, "-");
+	//}
+
+	//fprintf(outFile, "\n");
+
+	// iterates through rows
+	for (int i = 0; i < getMAZERows(m); i++) {
+			// reinitializes dash array for printing
+			for (int k = 0; k < getMAZEDashes(m); k++) {
+					midDash[k] = '-';
+			}
+
+			// if not start, print left wall
+			if (i != 0) { fprintf(outFile, "|"); }
+			// if start, do not print left wall
+			else if (i == 0) { fprintf(outFile, " "); }
+			// reset line index
+			lineIndex = 1;
+			// iterates through columns
+			for (int j = 0; j < getMAZEColumns(m); j++) {
+					CELL * ptr = m->matrix[i][j];
+					// if last cell, do not print right wall
+					if (i == getMAZERows(m) - 1 && j == getMAZEColumns(m) - 1) {
+							fprintf(outFile, " %d ", getValue(ptr));
+					}
+					// if right wall exists print vert. bar
+					else if (getRight(m->matrix[i][j]) == 1) {
+							fprintf(outFile, " %d |", getValue(ptr));
+					}
+					// if right wall does not exists, don't print vert. bar
+					else if (getRight(m->matrix[i][j]) == 0) {
+							fprintf(outFile, " %d  ", getValue(ptr));
+					}
+					// if bottom wall does not exist, print gap
+					if (getBottom(m->matrix[i][j]) == 0) {
+							midDash[lineIndex] = ' ';
+							midDash[lineIndex + 1] = ' ';
+							midDash[lineIndex + 2] = ' ';
+							lineIndex = lineIndex + 4;
+					}
+					// if bottom wall exists, skip to next col.
+					else if (getBottom(m->matrix[i][j]) == 1) {
+							lineIndex = lineIndex + 4;
+					}
+			}
+			fprintf(outFile, "\n");
+
+			// prints barrier between rows
+			for (int x = 0; x < getMAZEDashes(m); x++) {
+					fprintf(outFile, "%c", midDash[x]);
+			}
+			fprintf(outFile, "\n");
+	}
+	fclose(outFile);
 }
 
 extern void drawMAZE(MAZE * m) {
