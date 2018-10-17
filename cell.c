@@ -32,7 +32,7 @@ extern CELL * newCELL(void) {
     cell->column = 0;
     cell->rightWall = 1;
     cell->bottomWall = 1;
-    cell->value = -1;
+    cell->value = 0;
     cell->nCount = 0;
     cell->visited = 0;
 
@@ -84,8 +84,8 @@ extern int getRight(CELL * elem) { return elem->rightWall; }
 extern int getBottom(CELL * elem) { return elem->bottomWall; }
 
 extern void setCELLLocation(CELL * elem, int r, int c) {
-    elem->row = r;
-    elem->column = c;
+  elem->row = r;
+  elem->column = c;
 }
 
 extern int getRow(CELL * elem) { return elem->row; }

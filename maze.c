@@ -221,11 +221,11 @@ extern void buildMAZE(MAZE * m) {
 				createNeighbors(m, curr, neighbors, row, col);
 				CELL * neighbor;
 				if (getNeighborCount(curr) != 0) {
-						unsigned int index = random() % getNeighborCount(curr);
-						neighbor = (CELL *)getDA(neighbors, index);
+					unsigned int index = random() % getNeighborCount(curr);
+					neighbor = (CELL *)getDA(neighbors, index);
 				}
 				else {
-						neighbor = 0;
+					neighbor = 0;
 				}
 
 				// no eligible neighbors, so pop
@@ -255,128 +255,10 @@ extern void buildMAZE(MAZE * m) {
 						setVisited(neighbor, 1);
 						push(s, neighbor);
 				}
+				//freeDA(neighbors);
 		}
 		freeSTACK(s);
 	}
-}
-
-// performs BFS
-extern void solveMAZE(MAZE * m) {
-		// for each cell in maze, mark as unvisited
-		for (int i = 0; i < getMAZERows(m); ++i) {
-				for (int j = 0; j < getMAZEColumns(m); ++j) {
-						CELL * ptr = m->matrix[i][j];
-						setVisited(ptr, 0);
-				}
-		}
-		// creates queue for BFS
-		QUEUE * q = newQUEUE();
-		CELL * start = m->matrix[0][0];
-		// for marking nodes
-		int step = 0;
-		int val = 0;
-		val = step % 10;
-		setValue(start, val);
-		step++;
-		enqueue(q, start);
-		// while queue is not empty
-		while (sizeQUEUE(q) != 0) {
-				CELL * curr = (CELL *)peekQUEUE(q);
-				// if v is the exit cell
-				if (getRow(curr) == getMAZERows(m) - 1 && getColumn(curr) == getMAZEColumns(m) - 1) {
-						dequeue(q);
-						break;
-				}
-				// if cell is unvisited
-				else {
-						DA * neighbors = newDA();
-						createNeighbors(m, curr, neighbors, getRow(curr), getColumn(curr));
-						for (int i = 0; i < getNeighborCount(curr); ++i) {
-								CELL * neighbor = (CELL *)getDA(neighbors, i);
-								if (getVisited(neighbor) != 1) {
-										setVisited(neighbor, 1);
-										val = step % 10;
-										setValue(neighbor, val);
-										step++;
-										enqueue(q, neighbor);
-								}
-						}
-				}
-				dequeue(q);
-		}
-		// draws maze
-		drawSolvedMAZE(m);
-		/*FILE * outFile;
-		char * oFile = m->outFile;
-		outFile = fopen(oFile, "w");
-		if (outFile == NULL) {
-				printf("Error in solveMAZE(): file %s unable to be opened\n", oFile);
-				exit(1);
-		}
-		// initializes dash array for printing
-		char midDash[getMAZEDashes(m)];
-		for (int i = 0; i < getMAZEDashes(m); i++) {
-				midDash[i] = '-';
-		}
-
-		int lineIndex;
-
-		// prints top barrier
-		//for (int i = 0; i < getMAZEDashes(m); i++) {
-			//	fprintf(outFile, "-");
-		//}
-
-		//fprintf(outFile, "\n");
-
-		// iterates through rows
-		for (int i = 0; i < getMAZERows(m); i++) {
-				// reinitializes dash array for printing
-				for (int k = 0; k < getMAZEDashes(m); k++) {
-						midDash[k] = '-';
-				}
-
-				// if not start, print left wall
-				if (i != 0) { fprintf(outFile, "|"); }
-				// if start, do not print left wall
-				else if (i == 0) { fprintf(outFile, " "); }
-				// reset line index
-				lineIndex = 1;
-				// iterates through columns
-				for (int j = 0; j < getMAZEColumns(m); j++) {
-						CELL * ptr = m->matrix[i][j];
-						// if last cell, do not print right wall
-						if (i == getMAZERows(m) - 1 && j == getMAZEColumns(m) - 1) {
-								fprintf(outFile, " %d ", getValue(ptr));
-						}
-						// if right wall exists print vert. bar
-						else if (getRight(m->matrix[i][j]) == 1) {
-								fprintf(outFile, " %d |", getValue(ptr));
-						}
-						// if right wall does not exists, don't print vert. bar
-						else if (getRight(m->matrix[i][j]) == 0) {
-								fprintf(outFile, " %d  ", getValue(ptr));
-						}
-						// if bottom wall does not exist, print gap
-						if (getBottom(m->matrix[i][j]) == 0) {
-								midDash[lineIndex] = ' ';
-								midDash[lineIndex + 1] = ' ';
-								midDash[lineIndex + 2] = ' ';
-								lineIndex = lineIndex + 4;
-						}
-						// if bottom wall exists, skip to next col.
-						else if (getBottom(m->matrix[i][j]) == 1) {
-								lineIndex = lineIndex + 4;
-						}
-				}
-				fprintf(outFile, "\n");
-
-				// prints barrier between rows
-				for (int x = 0; x < getMAZEDashes(m); x++) {
-						fprintf(outFile, "%c", midDash[x]);
-				}
-				fprintf(outFile, "\n");
-		}*/
-		//fclose(outFile);
 }
 
 extern void drawSolvedMAZE(MAZE * m) {
@@ -389,26 +271,25 @@ extern void drawSolvedMAZE(MAZE * m) {
 	}
 	// initializes dash array for printing
 	char midDash[getMAZEDashes(m)];
-	//for (int i = 0; i < getMAZEDashes(m); i++) {
-		//	midDash[i] = '-';
-	//}
+	for (int i = 0; i < getMAZEDashes(m); i++) {
+			midDash[i] = '-';
+	}
 
 	int lineIndex;
 
 	// prints top barrier
-	//for (int i = 0; i < getMAZEDashes(m); i++) {
-		//	fprintf(outFile, "-");
-	//}
+	for (int i = 0; i < getMAZEDashes(m); i++) {
+			fprintf(outFile, "-");
+	}
 
-	//fprintf(outFile, "\n");
+	fprintf(outFile, "\n");
 
 	// iterates through rows
 	for (int i = 0; i < getMAZERows(m); i++) {
-			// reinitializes dash array for printing
+		// reinitializes dash array for printing
 			for (int k = 0; k < getMAZEDashes(m); k++) {
 					midDash[k] = '-';
 			}
-
 			// if not start, print left wall
 			if (i != 0) { fprintf(outFile, "|"); }
 			// if start, do not print left wall
@@ -453,69 +334,121 @@ extern void drawSolvedMAZE(MAZE * m) {
 	fclose(outFile);
 }
 
+// performs BFS
+extern void solveMAZE(MAZE * m) {
+	// for each cell in maze, mark as unvisited
+	for (int i = 0; i < getMAZERows(m); ++i) {
+		for (int j = 0; j < getMAZEColumns(m); ++j) {
+			CELL * ptr = m->matrix[i][j];
+			setVisited(ptr, 0);
+		}
+	}
+	// creates queue for BFS
+	QUEUE * q = newQUEUE();
+	CELL * start = m->matrix[0][0];
+	setVisited(start, 1);
+	int step = 0;
+	int val = 0;
+	val = step % 10;
+	setValue(start, val);
+
+	enqueue(q, start);
+	while (sizeQUEUE(q) != 0) {
+		CELL * curr = (CELL *)dequeue(q);
+		int row = getRow(curr);
+		int col = getColumn(curr);
+		// if cell is the exit cell, break exploration process
+		if (row == getMAZERows(m) - 1 && col == getMAZEColumns(m) - 1) { break; }
+		else {
+			DA * neighbors = newDA();
+			createNeighbors(m, curr, neighbors, row, col);
+			for (int i = 0; i < getNeighborCount(curr); ++i) {
+				CELL * neighbor = (CELL *)getDA(neighbors, i);
+				// if neighbor is unvisited
+				if (getVisited(neighbor) == 0) {
+					// mark as visited
+					setVisited(neighbor, 1);
+					val = 0;
+					val = step % 10;
+					setValue(start, val);
+					// enqueue onto queue to keep exploring
+					enqueue(q, neighbor);
+					++step;
+				}
+			}
+			setExamined(curr, 1);
+			freeDA(neighbors);
+		}
+	}
+	freeQUEUE(q);
+	// draws maze
+	drawSolvedMAZE(m);
+}
+
+
 extern void drawMAZE(MAZE * m) {
-				// initializes dash array for printing
-				char midDash[getMAZEDashes(m)];
-				for (int i = 0; i < getMAZEDashes(m); i++) {
-						midDash[i] = '-';
+	// initializes dash array for printing
+	char midDash[getMAZEDashes(m)];
+	for (int i = 0; i < getMAZEDashes(m); i++) {
+		midDash[i] = '-';
+	}
+
+	int lineIndex;
+
+	// prints top barrier
+	for (int i = 0; i < getMAZEDashes(m); i++) {
+		fprintf(stdout, "-");
+	}
+
+	fprintf(stdout, "\n");
+
+	// iterates through rows
+	for (int i = 0; i < getMAZERows(m); i++) {
+		// reinitializes dash array for printing
+		for (int k = 0; k < getMAZEDashes(m); k++) {
+			midDash[k] = '-';
+		}
+
+		// if not start, print left wall
+		if (i != 0) { fprintf(stdout, "|"); }
+		// if start, do not print left wall
+		else if (i == 0) { fprintf(stdout, " "); }
+		// reset line index
+		lineIndex = 1;
+			// iterates through columns
+		for (int j = 0; j < getMAZEColumns(m); j++) {
+			// if last cell, do not print right wall
+			if (i == getMAZERows(m) - 1 && j == getMAZEColumns(m) - 1) {
+				fprintf(stdout, "    ");
+			}
+			// if right wall exists print vert. bar
+			else if (getRight(m->matrix[i][j]) == 1) {
+				fprintf(stdout, "   |");
+			}
+			// if right wall does not exists, don't print vert. bar
+			else if (getRight(m->matrix[i][j]) == 0) {
+				fprintf(stdout, "    ");
+			}
+			// if bottom wall does not exist, print gap
+			if (getBottom(m->matrix[i][j]) == 0) {
+				midDash[lineIndex] = ' ';
+				midDash[lineIndex + 1] = ' ';
+				midDash[lineIndex + 2] = ' ';
+				lineIndex = lineIndex + 4;
+			}
+			// if bottom wall exists, skip to next col.
+			else if (getBottom(m->matrix[i][j]) == 1) {
+				lineIndex = lineIndex + 4;
 				}
+		}
+		fprintf(stdout, "\n");
 
-				int lineIndex;
-
-				// prints top barrier
-				for (int i = 0; i < getMAZEDashes(m); i++) {
-						fprintf(stdout, "-");
-				}
-
-				fprintf(stdout, "\n");
-
-				// iterates through rows
-				for (int i = 0; i < getMAZERows(m); i++) {
-						// reinitializes dash array for printing
-						for (int k = 0; k < getMAZEDashes(m); k++) {
-								midDash[k] = '-';
-						}
-
-						// if not start, print left wall
-						if (i != 0) { fprintf(stdout, "|"); }
-						// if start, do not print left wall
-						else if (i == 0) { fprintf(stdout, " "); }
-						// reset line index
-						lineIndex = 1;
-						// iterates through columns
-						for (int j = 0; j < getMAZEColumns(m); j++) {
-								// if last cell, do not print right wall
-								if (i == getMAZERows(m) - 1 && j == getMAZEColumns(m) - 1) {
-										fprintf(stdout, "   ");
-								}
-								// if right wall exists print vert. bar
-								else if (getRight(m->matrix[i][j]) == 1) {
-										fprintf(stdout, "   |");
-								}
-								// if right wall does not exists, don't print vert. bar
-								else if (getRight(m->matrix[i][j]) == 0) {
-										fprintf(stdout, "    ");
-								}
-								// if bottom wall does not exist, print gap
-								if (getBottom(m->matrix[i][j]) == 0) {
-										midDash[lineIndex] = ' ';
-										midDash[lineIndex + 1] = ' ';
-										midDash[lineIndex + 2] = ' ';
-										lineIndex = lineIndex + 4;
-								}
-								// if bottom wall exists, skip to next col.
-								else if (getBottom(m->matrix[i][j]) == 1) {
-										lineIndex = lineIndex + 4;
-								}
-						}
-						fprintf(stdout, "\n");
-
-						// prints barrier between rows
-						for (int x = 0; x < getMAZEDashes(m); x++) {
-								fprintf(stdout, "%c", midDash[x]);
-						}
-						fprintf(stdout, "\n");
-				}
+		// prints barrier between rows
+		for (int x = 0; x < getMAZEDashes(m); x++) {
+			fprintf(stdout, "%c", midDash[x]);
+		}
+		fprintf(stdout, "\n");
+	}
 }
 
 extern void pushMAZE(MAZE * m) {

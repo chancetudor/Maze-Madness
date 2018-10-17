@@ -17,6 +17,7 @@
 typedef void (*FM)(void * ptr); // typedef declaration to store a freeMethod function pointer in CDA struct
 typedef void (*DM)(void * ptr, FILE *fp); // typedef declaration to store a displayMethod function pointer in CDA struct
 static int getCapacityCDA(CDA * items);
+static void setCapacityCDA(CDA * items, int cap);
 static int correctIndex(CDA *items, int oldIndex);
 static int getStartCDA(CDA * items);
 static int getEndCDA(CDA * items);
@@ -62,13 +63,8 @@ static bool isFull(CDA * items) {
   else { return false; }
 }
 
-static int correctIndex(CDA *items, int oldIndex) {
-  int index = (oldIndex + getCapacityCDA(items) + getStartCDA(items)) % getCapacityCDA(items);
-  return index;
-}
-
 static void doubleArray(CDA * items) {
-  int newCap = items->capacity * 2;
+  int newCap = getCapacityCDA(items) * 2;
   void * (*temp) = malloc(sizeof(void *) * newCap);
   assert(temp != 0);
   for (int i = 0; i < sizeCDA(items); i++) { temp[i] = getCDA(items, i); }
@@ -76,11 +72,16 @@ static void doubleArray(CDA * items) {
   items->storage = temp;
   items->startIndex = 0;
   items->endIndex = sizeCDA(items);
-  items->capacity = newCap;
+  setCapacityCDA(items, newCap);
 }
 
 static void halveArray(CDA * items) {
-  int newCap = items->capacity / 2;
+  int newCap = 0;
+  if (getCapacityCDA(items) != 1) {
+    newCap = getCapacityCDA(items) / 2;
+  }
+  else { newCap = getCapacityCDA(items); }
+  //int newCap = getCapacityCDA(items) / 2;
   void * (*temp) = malloc(sizeof(void*) * newCap);
   assert(temp != 0);
   for (int i = 0; i < sizeCDA(items); i++) { temp[i] = getCDA(items, i); }
@@ -88,16 +89,12 @@ static void halveArray(CDA * items) {
   items->storage = temp;
   items->startIndex = 0;
   items->endIndex = sizeCDA(items);
-  items->capacity = newCap;
+  setCapacityCDA(items, newCap);
 }
 
-static int getStartCDA(CDA * items) { return items->startIndex; }
-
-static int getEndCDA(CDA * items) { return items->endIndex; }
-
-static int getIndex(CDA * items, int oldIndex) {
-  int trueIndex = correctIndex(items, oldIndex);
-  return trueIndex;
+static int correctIndex(CDA *items, int oldIndex) {
+  int index = (oldIndex + getCapacityCDA(items) + getStartCDA(items)) % getCapacityCDA(items);
+  return index;
 }
 
 // places value in slot named by given index
@@ -105,17 +102,19 @@ static int getIndex(CDA * items, int oldIndex) {
 // if no room for insertion, array grows by doubling
 extern void insertCDA(CDA *items, int index, void *value) {
   assert(index >= 0 && index <= sizeCDA(items));
-
+  // if full, then double
   if (isFull(items) == true) { doubleArray(items); }
 
   if (index == 0) { // insert at front of CDA
     if (sizeCDA(items) != 0) { items->startIndex = correctIndex(items, -1); }
+
     if (sizeCDA(items) == 0) { items->endIndex = 1; }
+
     items->storage[getStartCDA(items)] = value;
     items->size += 1;
   }
 
-  else if (index == sizeCDA(items)) {
+  else if (index == sizeCDA(items)) { // insert at back of CDA
     items->storage[getEndCDA(items)] = value;
     items->endIndex = correctIndex(items, sizeCDA(items) + 1);
     items->size += 1;
@@ -188,6 +187,15 @@ extern void *removeCDA(CDA * items, int index) {
   return value;
 }
 
+static int getStartCDA(CDA * items) { return items->startIndex; }
+
+static int getEndCDA(CDA * items) { return items->endIndex; }
+
+static int getIndex(CDA * items, int oldIndex) {
+  int trueIndex = correctIndex(items, oldIndex);
+  return trueIndex;
+}
+
 // takes two arrays and moves all the items in the donor array to the recipient arrays
 extern void unionCDA(CDA *recipient, CDA *donor) {
   for (int i = 0; i < sizeCDA(donor); i++) {
@@ -235,6 +243,8 @@ extern int sizeCDA(CDA *items) { return items->size; }
 
 // method returns the capacity of array
 static int getCapacityCDA(CDA * items) { return items->capacity; }
+
+static void setCapacityCDA(CDA * items, int c) { items->capacity = c; }
 
 extern void displayCDA(CDA *items, FILE *fp) {
   if (sizeCDA(items) == 0) {

@@ -27,5 +27,7 @@ extern void freeDA(DA *items);
 
 #define insertDAfront(items,value) insertDA(items,0,value)
 #define insertDAback(items,value)  insertDA(items,sizeDA(items),value)
+#define removeDAfront(items)       removeDA(items,0)
+#define removeDAback(items)        removeDA(items,sizeDA(items)-1)
 
 #endif /* da_h */
