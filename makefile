@@ -50,13 +50,13 @@ test : maze #da stack cda queue
 	#./cda
 	#./stack
 	#./queue
-	./amaze -r 2777 -c 83 16 ready.maze -d ready.maze
+	./amaze -r 2777 -c 83 16 unready.maze -d ready.maze -s unready.maze ready.maze
 valgrind : maze #da stack cda queue
 	#valgrind --leak-check=full ./da
 	#valgrind --leak-check=full ./cda
 	#valgrind --leak-check=full ./stack
 	#valgrind --leak-check=full ./queue
-	valgrind --leak-check=full ./amaze
+	valgrind ./amaze -r 2777 -c 83 16 unready.maze -d ready.maze -s unready.maze ready.maze
 clean :
 	rm -f $(DAOBJS) $(SOBJS) $(CDAOBJS) $(QOBJS) $(COBJS) $(MOBJS) \
 	da stack cda queue maze amaze
