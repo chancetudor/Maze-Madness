@@ -28,10 +28,5 @@ extern void setNeighborCount(CELL * ptr, int count);
 extern int getNeighborCount(CELL * ptr);
 extern void setVisited(CELL * ptr, int v);
 extern int getVisited(CELL * ptr);
-extern void setExamined(CELL * ptr, int e);
-extern int getExamined(CELL * ptr);
-extern void freeCELL(CELL * elem);
-
-
 
 #endif /* cell_h */

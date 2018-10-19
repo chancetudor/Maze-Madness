@@ -28,14 +28,29 @@ struct maze {
 	int numDashes;
 };
 
-extern MAZE * newMAZE(void) {
-	MAZE * m = malloc(sizeof(MAZE)); // FIXME: free!
-	assert(m != 0);
-	m->rows = 0;
-	m->columns = 0;
+extern MAZE * newMAZE(int r, int c) {
+	MAZE * m = malloc(sizeof(MAZE));
+	assert(m != NULL);
+	m->rows = r;
+	m->columns = c;
 	m->seed = 1;
-	m->matrix = 0;
 	m->numDashes = 0;
+	// create a one-dimensional array of row pointers
+	m->matrix = malloc(sizeof(CELL **) * m->rows);
+	// make all the rows
+	for (int i = 0; i < m->rows; ++i) {
+		// create a single row
+		m->matrix[i] = malloc(sizeof(CELL *) * m->columns);
+		// initialize the slots in the row
+		for (int j = 0; j < m->columns; ++j) {
+			m->matrix[i][j] = newCELL();
+			// set row and column vals for each new cell
+			CELL * ptr = m->matrix[i][j];
+			setCELLLocation(ptr, i, j);
+			// end of maze should not have right wall
+			if (i == r - 1 && j == c - 1) { setRight(ptr, 0); }
+		}
+	}
 
 	return m;
 }
@@ -43,11 +58,13 @@ extern MAZE * newMAZE(void) {
 extern void freeMAZE(MAZE * m) {
 	for (int i = 0; i < getMAZERows(m); ++i) {
 		for (int j = 0; j < getMAZEColumns(m); ++j) {
-      CELL * ptr = m->matrix[i][j];
-			freeCELL(ptr);
+      free(m->matrix[i][j]);
 		}
 	}
-
+	for (int i = 0; i < getMAZERows(m); i++) {
+		free(m->matrix[i]);
+	}
+	free(m->matrix);
 	free(m);
 }
 
@@ -67,25 +84,6 @@ extern int getMAZEDashes(MAZE * m) { return m->numDashes; }
 extern int getMAZERows(MAZE * m) { return m->rows; }
 
 extern int getMAZEColumns(MAZE * m) { return m->columns; }
-
-extern void createMatrix(MAZE * m) {
-	// create a one-dimensional array of row pointers
-	m->matrix = malloc(sizeof(CELL **) * getMAZERows(m)); // FIXME: free!
-	// make all the rows
-	for (int i = 0; i < getMAZERows(m); ++i) {
-		// create a single row
-		m->matrix[i] = malloc(sizeof(CELL *) * getMAZEColumns(m)); // FIXME: free!
-		// initialize the slots in the row
-		for (int j = 0; j < getMAZEColumns(m); ++j) {
-			m->matrix[i][j] = newCELL(); // FIXME: free!
-			// set row and column vals for each new cell
-			CELL * ptr = m->matrix[i][j];
-			setCELLLocation(ptr, i, j);
-			// end of maze should not have right wall
-			if (i == getMAZERows(m) - 1 && j == getMAZEColumns(m) - 1) { setRight(ptr, 0); }
-		}
-	}
-}
 
 extern void createNeighbors(MAZE * m, CELL * curr, DA * array, int row, int col) {
 	int n = 0;
@@ -313,7 +311,6 @@ extern void solveMAZE(MAZE * m) {
           if (getRight(neighbor) == 0 && getVisited(neighbor) == 0) {
             // mark as visited
             setVisited(neighbor, 1);
-            //val = step % 10;
             val = getValue(pred) + 1;
             if (val > 9) {
               val = 0;
@@ -330,7 +327,6 @@ extern void solveMAZE(MAZE * m) {
           if (getRight(curr) == 0 && getVisited(neighbor) == 0) {
             // mark as visited
             setVisited(neighbor, 1);
-            //val = step % 10;
             val = getValue(pred) + 1;
             if (val > 9) {
               val = 0;
@@ -350,7 +346,7 @@ extern void solveMAZE(MAZE * m) {
   freeQUEUE(q);
 }
 
-extern void drawMAZE(MAZE * m, FILE * file) {
+extern void drawMAZE(MAZE * m) {
 	// initializes dash array for printing
 	char midDash[getMAZEDashes(m)];
 	for (int i = 0; i < getMAZEDashes(m); i++) {
@@ -361,10 +357,10 @@ extern void drawMAZE(MAZE * m, FILE * file) {
 
 	// prints top barrier
 	for (int i = 0; i < getMAZEDashes(m); i++) {
-		fprintf(stdout, "-");
+		printf("-");
 	}
 
-	fprintf(stdout, "\n");
+	printf("\n");
 
 	// iterates through rows
 	for (int i = 0; i < getMAZERows(m); i++) {
@@ -374,9 +370,9 @@ extern void drawMAZE(MAZE * m, FILE * file) {
 		}
 
 		// if not start, print left wall
-		if (i != 0) { fprintf(stdout, "|"); }
+		if (i != 0) { printf("|"); }
 		// if start, do not print left wall
-		else if (i == 0) { fprintf(stdout, " "); }
+		else if (i == 0) { printf(" "); }
 		// reset line index
 		lineIndex = 1;
 			// iterates through columns
@@ -385,23 +381,23 @@ extern void drawMAZE(MAZE * m, FILE * file) {
 			// if last cell, do not print right wall
 			if (i == getMAZERows(m) - 1 && j == getMAZEColumns(m) - 1) {
         if (getValue(ptr) >= 0 && getVisited(ptr) == 2) {
-          fprintf(file, " %d  ", getValue(ptr));
+          printf(" %d  ", getValue(ptr));
         }
-				else { fprintf(stdout, "    "); }
+				else { printf("    "); }
 			}
 			// if right wall exists print vert. bar
 			else if (getRight(ptr) == 1) {
         if (getValue(ptr) >= 0 && getVisited(ptr) == 2) {
-          fprintf(file, " %d |", getValue(ptr));
+          printf(" %d |", getValue(ptr));
         }
-        else { fprintf(stdout, "   |"); }
+        else { printf("   |"); }
 			}
 			// if right wall does not exists, don't print vert. bar
 			else if (getRight(ptr) == 0) {
         if (getValue(ptr) >= 0 && getVisited(ptr) == 2) {
-          fprintf(file, " %d  ", getValue(ptr));
+          printf(" %d  ", getValue(ptr));
         }
-        else { fprintf(stdout, "    "); }
+        else { printf("    "); }
 			}
 			// if bottom wall does not exist, print gap
 			if (getBottom(ptr) == 0) {
@@ -415,13 +411,13 @@ extern void drawMAZE(MAZE * m, FILE * file) {
 				lineIndex = lineIndex + 4;
 				}
 		}
-		fprintf(stdout, "\n");
+		printf("\n");
 
 		// prints barrier between rows
 		for (int x = 0; x < getMAZEDashes(m); x++) {
-			fprintf(stdout, "%c", midDash[x]);
+			printf("%c", midDash[x]);
 		}
-		fprintf(stdout, "\n");
+		printf("\n");
 	}
 }
 
@@ -443,8 +439,6 @@ extern void pushMAZE(MAZE * m, FILE * oFile) {
 }
 
 extern MAZE * pullMAZE(FILE * iFile) {
-	MAZE * new = newMAZE(); // FIXME: free?
-  //MAZE * copy = new;
 	if (iFile == NULL) {
 		printf("Error in pullMAZE(): file unable to be opened\n");
 		exit(1);
@@ -454,9 +448,8 @@ extern MAZE * pullMAZE(FILE * iFile) {
 		int c = 0; // cols
 		int d = 0; // dashes
 		fscanf(iFile, "%d %d %d", &r, &c, &d);
-		setMAZESize(new, r, c);
+		MAZE * new = newMAZE(r, c);
 		setMAZEDashes(new, d);
-	  createMatrix(new);
 		for (int i = 0; i < getMAZERows(new); ++i) {
 			for (int j = 0; j < getMAZEColumns(new); ++j) {
 				CELL * ptr = new->matrix[i][j];
@@ -475,7 +468,6 @@ extern MAZE * pullMAZE(FILE * iFile) {
 				setVisited(ptr, visited);
 			}
 		}
+		return new;
 	}
-  //free(new);
-	return new;
 }

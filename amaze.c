@@ -44,15 +44,13 @@ int main(int argc, char **argv) {
     return 0;
   }
   if (build) {
-    MAZE * m = newMAZE();
-    MAZE * copy = m;
     int rows = atoi(argv[build + 1]);
     int columns = atoi(argv[build + 2]);
+    MAZE * m = newMAZE(rows, columns);
+    MAZE * copy = m;
     char * oFile = argv[build + 3];
-    setMAZESize(copy, rows, columns);
     setMAZEDashes(copy, (getMAZEColumns(copy) * 4 + 1));
     setMAZESeed(copy, seedVal);
-    createMatrix(copy);
     buildMAZE(copy);
     FILE * outFile = fopen(oFile, "w");
     pushMAZE(copy, outFile);
@@ -63,19 +61,24 @@ int main(int argc, char **argv) {
     char * iFile = argv[solve + 1];
     char * oFile = argv[solve + 2];
     FILE * inFile = fopen(iFile, "r");
-    MAZE * newMaze = pullMAZE(inFile);
+    MAZE * new = pullMAZE(inFile);
     fclose(inFile);
-    solveMAZE(newMaze);
+    solveMAZE(new);
     FILE * outFile = fopen(oFile, "w");
-    pushMAZE(newMaze, outFile);
+    pushMAZE(new, outFile);
     fclose(outFile);
+    freeMAZE(new);
+    new = NULL;
   }
   if (draw) {
     char * iFile = argv[draw + 1];
     FILE * inFile = fopen(iFile, "r");
-    MAZE * newMaze = pullMAZE(inFile);
+
+    MAZE * new = pullMAZE(inFile);
     fclose(inFile);
-    drawMAZE(newMaze, stdout);
+    drawMAZE(new);
+    freeMAZE(new);
+    new = NULL;
   }
 
   return 0;

@@ -71,10 +71,6 @@ extern void setVisited(CELL * elem, int v) { elem->visited = v; }
 
 extern int getVisited(CELL * elem) { return elem->visited; }
 
-extern void setExamined(CELL * ptr, int e) { ptr->examined = e; }
-
-extern int getExamined(CELL * ptr) { return ptr->examined; }
-
 extern void setRight(CELL * elem, int right) { elem->rightWall = right; }
 
 extern void setBottom(CELL * elem, int bottom) { elem->bottomWall = bottom; }
@@ -95,5 +91,3 @@ extern int getColumn(CELL * elem) { return elem->column; }
 extern void setValue(CELL * elem, int val) { elem->value = val; }
 
 extern int getValue(CELL * elem) { return elem->value; }
-
-extern void freeCELL(CELL * c) { free(c); }
